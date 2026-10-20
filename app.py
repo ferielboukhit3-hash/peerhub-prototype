@@ -1,35 +1,62 @@
+# ==========================================
+# PeerHub - Interactive Skill Exchange Prototype (MVP)
+# ==========================================
+
 import streamlit as st
 
 st.set_page_config(page_title="PeerHub Prototype", page_icon="🚀", layout="centered")
 
+# Main Title & Subtitle
 st.title("🚀 PeerHub — Interactive Skill Exchange")
-st.subheader("منصة التبادل التفاعلي للمهارات والتعلم التشاركي")
+st.subheader("Skill Barter Economy & Live Peer-to-Peer Learning")
 
 st.markdown("---")
 
-st.sidebar.header("📝 بيانات المستخدم الجديد")
-user_name = st.sidebar.text_input("اسمك الكريم", "فريال")
-teach_skill = st.sidebar.selectbox("ماذا يمكنك أن تقدم؟", ["البرمجة (Python)", "الإسبانية", "التصميم (Canva)"])
-learn_skill = st.sidebar.selectbox("ماذا تريد أن تتعلم؟", ["الإسبانية", "البرمجة (Python)", "الإنجليزية"])
+# Sidebar: User Profile & Input
+st.sidebar.header("📝 User Profile Setup")
+user_name = st.sidebar.text_input("Your Name", "Feriel")
+teach_skill = st.sidebar.selectbox("What skill can you teach?", ["Python Programming", "Spanish", "UI/UX Design (Canva)"])
+learn_skill = st.sidebar.selectbox("What skill do you want to learn?", ["Spanish", "Python Programming", "English"])
+weekly_availability = st.sidebar.slider("Weekly Availability (Hours)", 1, 10, 3)
 
-st.write(f"### أهلاً بكِ يا {user_name} في لوحة التحكم التجريبية!")
+st.write(f"### Welcome back, {user_name}! Here is your Teach vs. Learn matching dashboard:")
 
+# Mock Database with advanced terms
 users_db = [
-    {"name": "أحمد", "teach": "البرمجة (Python)", "learn": "الإسبانية", "credits": 2, "badge": "شريك مثالي ⭐"},
-    {"name": "مريم", "teach": "الإسبانية", "learn": "البرمجة (Python)", "credits": 1, "badge": "مبتدئ ملتزم 📌"},
-    {"name": "سارة", "teach": "التصميم (Canva)", "learn": "الإنجليزية", "credits": 3, "badge": "شريك مثالي ⭐"}
+    {"name": "Ahmed", "teach": "Python Programming", "learn": "Spanish", "credits": 2, "badge": "Reliable Partner ⭐"},
+    {"name": "Maria", "teach": "Spanish", "learn": "Python Programming", "credits": 1, "badge": "Committed Beginner 📌"},
+    {"name": "Sarah", "teach": "UI/UX Design (Canva)", "learn": "English", "credits": 3, "badge": "Reliable Partner ⭐"}
 ]
 
-if st.button("🔍 ابحث عن شريك مطابق"):
-    match_found = False
-    for partner in users_db:
-        if partner["teach"] == learn_skill and partner["learn"] == teach_skill:
-            st.success(f"🎉 تم العثور على مطابقة مثالية (Win-Win) مع الشريك: {partner['name']}!")
-            st.info(f"🏆 الشارة: {partner['badge']} | 💰 رصيد بنك الساعات: {partner['credits']} ساعات")
-            match_found = True
-            break
-    if not match_found:
-        st.warning("⚠️ لم يتم العثور على مطابقة فورية. تم تسجيل طلبك في بنك المهارات بانتظار شريك جديد.")
+# Action Buttons & Matching Engine
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("🔍 Find Match"):
+        match_found = False
+        for partner in users_db:
+            if partner["teach"] == learn_skill and partner["learn"] == teach_skill:
+                st.success(f"🎉 Perfect Match Found! You are paired with: {partner['name']}")
+                st.info(f"🏆 Badge: {partner['badge']} | 💰 Skill Credits / Hour Bank: {partner['credits']} Hours")
+                match_found = True
+                break
+        if not match_found:
+            st.warning("⚠️ No direct match found right now. Your request has been safely added to the Skill Barter Economy queue.")
+
+with col2:
+    if st.button("Claim Hour Credits"):
+        st.success("✅ Session completed! 1 Hour added to your Skill Credits / Hour Bank.")
 
 st.markdown("---")
-st.caption("تم تطوير هذا النموذج الأولي (MVP) خصيصاً لمنصة Thirduni - أكتوبر 2026")
+
+# Excuse Management Section
+st.subheader("🛡️ Excuse Management System")
+excuse_reason = st.text_input("Submit valid excuse (if missing a scheduled live session):", placeholder="e.g., Internet outage / Health emergency")
+if st.button("Submit Valid Excuse"):
+    if excuse_reason:
+        st.info("⚠️ Excuse submitted to the platform review system. Your attendance score remains protected.")
+    else:
+        st.warning("Please type a reason before submitting your excuse.")
+
+st.markdown("---")
+st.caption("PeerHub Prototype (MVP) — Built for Thirduni — October 2026")
