@@ -4,10 +4,10 @@
 
 import streamlit as st
 
-st.set_page_config(page_title="PeerHub Prototype", page_icon="🚀", layout="centered")
+st.set_page_config(page_title="PeerHub Prototype", page_icon="🤝", layout="centered")
 
 # Main Title & Subtitle
-st.title("🚀 PeerHub — Interactive Skill Exchange")
+st.title(" PeerHub — Interactive Skill Exchange")
 st.subheader("Skill Barter Economy & Live Peer-to-Peer Learning")
 
 st.markdown("---")
