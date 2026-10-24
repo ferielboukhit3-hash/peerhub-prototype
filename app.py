@@ -22,6 +22,10 @@ try:
 except Exception as e:
     db_status = f"Database Connection Error: {e}"
 
+# --- SESSION STATE INITIALIZATION FOR MONTHLY EXCUSE LIMIT ---
+if "excuse_count" not in st.session_state:
+    st.session_state.excuse_count = 0  # Starts with 0 used out of 2 allowed per month
+
 # --- SIDEBAR & USER PROFILE SETUP ---
 st.sidebar.markdown("## 📝 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
@@ -120,23 +124,40 @@ with tab2:
 # --- TAB 3: EXCUSE VALIDATOR ---
 with tab3:
     st.header("🛡️ AI Excuse Validator & Rescheduling")
-    st.write("Need to reschedule a peer session? Submit your reason below for intelligent AI evaluation and badge protection.")
+    st.write("Need to reschedule a peer session? Submit your reason below for intelligent AI evaluation and strict policy enforcement.")
+    
+    # Display Monthly Status Tracker
+    current_used = st.session_state.excuse_count
+    remaining = max(0, 2 - current_used)
+    st.info(f"📅 **Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
     
     excuse_text = st.text_area("Describe your reason for rescheduling:", placeholder="e.g., Sudden internet outage, health emergency, or university exam conflict...")
     
     if st.button("Evaluate Excuse with AI"):
         if excuse_text:
             reason_lower = excuse_text.lower()
-            valid_keywords = ["internet", "outage", "health", "emergency", "sick", "hospital", "power", "electricity", "exam", "study", "family"]
-            is_valid = any(word in reason_lower for word in valid_keywords)
             
-            if is_valid:
-                st.success("✅ **AI Evaluation: Approved (Valid Emergency / Technical / Academic Issue)**")
-                st.info("💡 Session rescheduled successfully with **zero credit penalty**. Your 'Reliable Partner' badge remains fully protected! 🎉")
-                st.balloons()
+            # Strict Content Evaluation: Check for weak, vague, or nonsensical excuses
+            weak_triggers = ["i don't want", "lazy", "forgot", "bored", "playing", "sleep", "gaming", "whatever", "nothing"]
+            is_obviously_weak = any(w in reason_lower for w in weak_triggers)
+            
+            valid_keywords = ["internet", "outage", "health", "emergency", "sick", "hospital", "power", "electricity", "exam", "study", "family", "connection", "network"]
+            is_keyword_valid = any(word in reason_lower for word in valid_keywords)
+            
+            # Check if user has exceeded the monthly limit of 2
+            if st.session_state.excuse_count >= 2:
+                st.error("🚨 **Monthly Limit Exceeded (3rd Excuse Attempt)!**")
+                st.warning("⚠️ You have already used your maximum limit of **2 approved excuses** for this month. This 3rd request is **automatically rejected**.")
+                st.error("❌ **Penalty Applied:** 1 Hour credit deducted and your 'Reliable Partner' badge has been suspended / downgraded due to policy limit breach.")
+            elif is_obviously_weak or not is_keyword_valid:
+                st.warning("⚠️ **AI Evaluation: Flagged & Rejected (Weak or Vague Reason)**")
+                st.write("💡 Note: Casual or nonsensical reasons do not qualify for emergency waivers. Please coordinate directly with your peer.")
             else:
-                st.warning("⚠️ **AI Evaluation: Flagged (Weak or Unexcused Reason)**")
-                st.write("💡 Note: Casual delays do not qualify for automatic waiver. Please coordinate directly with your peer to reschedule.")
+                # Valid excuse and under the limit (1st or 2nd excuse of the month)
+                st.session_state.excuse_count += 1
+                st.success(f"✅ **AI Evaluation: Approved (Valid Emergency / Technical / Academic Issue)**")
+                st.info(f"💡 Session rescheduled successfully with **zero credit penalty**. Excuse **{st.session_state.excuse_count} of 2** recorded for this month. Your 'Reliable Partner' badge remains fully protected! 🎉")
+                st.balloons()
         else:
             st.warning("Please enter an excuse reason first.")
 
