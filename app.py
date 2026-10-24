@@ -71,6 +71,37 @@ if "pending_excuse" not in st.session_state:
         "text": "Sudden internet outage and power cut before session."
     }
 
+# --- MINIMALIST CSS STYLING ---
+st.markdown("""
+    <style>
+    .main {
+        background-color: #F9F7F7;
+    }
+    h1, h2, h3, h4 {
+        color: #1B1F3B !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    p, label, span {
+        color: #1B1F3B;
+    }
+    .stButton>button {
+        background-color: #3F72AF;
+        color: white;
+        border-radius: 6px;
+        padding: 0.4rem 1rem;
+        font-weight: 500;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #112D4E;
+        color: white;
+    }
+    div.stMarkdownContainer, div.stTabs, div.stTextInput, div.stSelectbox {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # --- SIDEBAR & USER PROFILE SETUP ---
 st.sidebar.markdown("## 📝 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
@@ -170,23 +201,19 @@ with tab3:
     st.header("💬 Partner Chat & Direct Messaging Hub")
     st.write("Communicate directly with your assigned learning partners, share resources, and track session schedules.")
     
-    # Partner selection for chat
     chat_partner = st.selectbox("Select Active Chat Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="chat_partner_select")
     
-    # --- 3. EMBEDDED SCHEDULE CARD IN CHAT ---
     st.markdown(f"""
-    <div style='background-color: #f0fdf4; border-left: 5px solid #22c55e; padding: 12px; border-radius: 8px; margin-bottom: 15px;'>
-        <h4>📅 Upcoming Session Schedule</h4>
-        <p><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
-        <p><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
+    <div style='background-color: #DBE2EF; border-left: 5px solid #3F72AF; padding: 12px; border-radius: 8px; margin-bottom: 15px;'>
+        <h4 style='color: #112D4E !important;'>📅 Upcoming Session Schedule</h4>
+        <p style='color: #112D4E;'><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
+        <p style='color: #112D4E;'><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Connection State Indicator
     st.markdown(f"🟢 **Connection State:** Connected securely with **{chat_partner}** (Active P2P Encrypted Channel)")
     st.markdown("---")
     
-    # Ensure chat history & vaults exist for this partner
     if chat_partner not in st.session_state.chat_messages:
         st.session_state.chat_messages[chat_partner] = [
             {"sender": chat_partner, "text": f"Hello {user_name}! Looking forward to our next skill exchange session."}
@@ -196,7 +223,6 @@ with tab3:
     if chat_partner not in st.session_state.visual_gallery:
         st.session_state.visual_gallery[chat_partner] = []
 
-    # Layout: Chat stream on left, Document Vault & Gallery on right
     chat_col, vault_col = st.columns([2, 1])
     
     with chat_col:
@@ -207,11 +233,10 @@ with tab3:
                 sender = msg.get("sender")
                 text = msg.get("text")
                 if sender == user_name:
-                    st.markdown(f"<div style='text-align: right; background-color: #e0f2fe; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>You:</b> {text}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: right; background-color: #DBE2EF; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>You:</b> {text}</div>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<div style='text-align: left; background-color: #f3f4f6; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>{sender}:</b> {text}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: left; background-color: #F9F7F7; border: 1px solid #DBE2EF; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>{sender}:</b> {text}</div>", unsafe_allow_html=True)
                     
-        # Message input form
         with st.form(key="chat_form", clear_on_submit=True):
             new_message = st.text_input("Type your message here:", placeholder="Type a message to coordinate your session...")
             submit_chat = st.form_submit_button("Send Message 📤")
@@ -230,11 +255,10 @@ with tab3:
                 st.session_state.shared_files[chat_partner].append(file_info)
                 st.success(f"Uploaded {uploaded_file.name} successfully!")
         
-        # Display Downloadable Resource Cards
         if st.session_state.shared_files[chat_partner]:
             for f in st.session_state.shared_files[chat_partner]:
                 st.markdown(f"""
-                <div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; margin-bottom: 8px;'>
+                <div style='background-color: #F9F7F7; border: 1px solid #DBE2EF; padding: 8px; border-radius: 6px; margin-bottom: 8px;'>
                     📄 <b>{f.get('filename')}</b><br>
                     <small>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
                     📥 <a href='#' target='_blank'>Download Resource</a>
@@ -254,7 +278,7 @@ with tab3:
         if st.session_state.visual_gallery[chat_partner]:
             for vis in st.session_state.visual_gallery[chat_partner]:
                 st.markdown(f"""
-                <div style='background-color: #fef3c7; border: 1px solid #fde68a; padding: 8px; border-radius: 6px; margin-bottom: 6px;'>
+                <div style='background-color: #DBE2EF; border: 1px solid #3F72AF; padding: 8px; border-radius: 6px; margin-bottom: 6px;'>
                     🎨 <b>{vis.get('title')}</b><br>
                     <small>Archived by: {vis.get('author')}</small>
                 </div>
