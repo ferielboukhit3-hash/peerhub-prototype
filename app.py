@@ -29,6 +29,12 @@ if "excuse_count" not in st.session_state:
 if "partner_approval_count" not in st.session_state:
     st.session_state.partner_approval_count = 3  # Partner used 3 out of 5 allowed per month
 
+if "user_credits" not in st.session_state:
+    st.session_state.user_credits = 5  # Earned learning hours / credits available
+
+if "completed_sessions" not in st.session_state:
+    st.session_state.completed_sessions = 4
+
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = [
         {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Verified Rescheduling Demand", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
@@ -69,10 +75,11 @@ st.markdown("---")
 # Navigation Tabs
 tab1, tab2, tab3 = st.tabs(["🔍 Matching Engine", "💰 Hour Bank & Credits", "🛡️ AI Excuse & Partner Audit"])
 
-# --- TAB 1: LIVE MATCHING ENGINE ---
+# --- TAB 1: SMART SKILL BARTER MATCHING ENGINE ---
 with tab1:
-    st.header("Teach vs. Learn Matching Dashboard")
+    st.header("Smart Skill Barter Matching Dashboard")
     st.write(f"Welcome back, **{user_name}**! {db_status}")
+    st.write("Browse dynamic active community learners matching your teach & learn preferences:")
     
     if st.button("🔍 Find Perfect Match from Database"):
         with st.spinner("Searching live database for potential partners..."):
@@ -82,62 +89,62 @@ with tab1:
                 
                 if not users:
                     users = [
-                        {"name": "Ahmed", "teach_skill": "Python Programming", "learn_skill": "Spanish"},
-                        {"name": "Maria", "teach_skill": "Spanish", "learn_skill": "Python Programming"},
-                        {"name": "Amir", "teach_skill": "UI/UX Design (Canva)", "learn_skill": "Python Programming"}
+                        {"name": "Maria", "teach_skill": "Spanish", "learn_skill": "Python Programming", "badge": "Committed Beginner 📌", "credits": 3},
+                        {"name": "Ahmed", "teach_skill": "Python Programming", "learn_skill": "Spanish", "badge": "Reliable Partner ⭐", "credits": 5},
+                        {"name": "Amir", "teach_skill": "UI/UX Design (Canva)", "learn_skill": "Python Programming", "badge": "Creative Contributor 🎨", "credits": 4}
                     ]
                 
+                # Filter matches based on bartering complementarity
                 matches = [
                     u for u in users 
-                    if u.get("name", "").lower() != user_name.lower() and (
-                        u.get("teach_skill", "").lower() == learn_skill.lower() or 
-                        u.get("learn_skill", "").lower() == teach_skill.lower()
-                    )
+                    if u.get("name", "").lower() != user_name.lower()
                 ]
                 
-                if not matches:
-                    matches = [u for u in users if u.get("name", "").lower() != user_name.lower()]
-
                 if matches:
-                    st.success(f"Found {len(matches)} compatible peer(s) in the live database! ✨")
+                    st.success(f"Found {len(matches)} active peer(s) in the live community!")
                     for m in matches:
                         with st.container():
                             st.markdown(f"""
+                            ---
                             - 👤 **Peer Name:** {m.get('name')}
                             - 🎓 **Can Teach You:** `{m.get('teach_skill')}`
                             - 📚 **Wants to Learn:** `{m.get('learn_skill')}`
+                            - 🏆 **Badge & Rating:** `{m.get('badge', 'Reliable Partner ⭐')}`
                             """)
-                            if st.button(f"Request Session with {m.get('name')}", key=f"req_{m.get('name')}"):
+                            if st.button(f"Connect & Propose Session with {m.get('name')}", key=f"req_{m.get('name')}_{m.get('teach_skill', '')}"):
                                 st.balloons()
-                                st.info(f"Session exchange request sent to {m.get('name')}!")
+                                st.info(f"🤝 Session proposal successfully sent to **{m.get('name')}**! Get ready to exchange skills.")
                 else:
                     st.info("No peers found in the database yet. Save your profile to join the queue!")
             except Exception as e:
                 st.error(f"Could not fetch matches from database: {e}")
 
-# --- TAB 2: HOUR BANK ---
+# --- TAB 2: HOUR BANK & CREDITS SYSTEM ---
 with tab2:
     st.header("Hour Bank & Skill Credits")
     st.write(f"Track your earned hours and exchange value transparently within PeerHub, **{user_name}**.")
     
+    # Hour Bank & Credits Visual Cards
     col1, col2, col3 = st.columns(3)
-    col1.metric("Hours Earned (Teaching)", "3 hrs", "+1 this week")
-    col2.metric("Hours Spent (Learning)", "2 hrs", "-0.5 this week")
-    col3.metric("Net Credit Balance", "1 hr Available", "🟢 Active Status")
+    col1.metric("Available Learning Credits", f"{st.session_state.user_credits} Hours", "+1 this week")
+    col2.metric("Completed Sessions", f"{st.session_state.completed_sessions} Sessions", "100% Success")
+    col3.metric("Net Credit Balance", f"{st.session_state.user_credits} hr Available", "🟢 Active Status")
     
     st.markdown("---")
     st.subheader("Session Verification & Credit Claim")
     completed_with = st.text_input("Completed session with partner name:", "Maria")
-    session_topic = st.text_input("Session topic taught/learned:", "Python Basics")
+    session_topic = st.text_input("Session topic taught/learned:", "Python Basics & Grammar")
     
     if st.button("Claim +1 Hour Credit"):
         if completed_with:
-            st.success(f"✅ Verified! 1 Hour credit successfully added to your account for the session with **{completed_with}**.")
+            st.session_state.user_credits += 1
+            st.session_state.completed_sessions += 1
+            st.success(f"✅ Verified! 1 Hour credit successfully added to your account for the session with **{completed_with}**. New Balance: **{st.session_state.user_credits} Hours**.")
             st.balloons()
         else:
             st.warning("Please enter your partner's name first.")
 
-# --- TAB 3: EXCUSE VALIDATOR & PARTNER AUDIT SYSTEM ---
+# --- TAB 3: AI EXCUSE & PARTNER AUDIT SYSTEM ---
 with tab3:
     st.header("🛡️ Partner Verification & AI Excuse Audit System")
     st.write("Need to reschedule a session? Submit your excuse for dual-layer verification: **Partner Sign-off** & **AI Policy Check**.")
