@@ -46,6 +46,18 @@ if "chat_messages" not in st.session_state:
         ]
     }
 
+if "shared_files" not in st.session_state:
+    st.session_state.shared_files = {
+        "Maria": [{"filename": "python_basics_cheat_sheet.pdf", "uploader": "Feriel", "size": "240 KB"}],
+        "Ahmed": []
+    }
+
+if "visual_gallery" not in st.session_state:
+    st.session_state.visual_gallery = {
+        "Maria": [{"title": "UI Wireframe Sketch", "author": "Feriel", "type": "Design Layout"}],
+        "Ahmed": []
+    }
+
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = [
         {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Verified Rescheduling Demand", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
@@ -83,7 +95,7 @@ st.subheader("Interactive Skill Exchange & Live Peer-to-Peer Learning Ecosystem"
 
 st.markdown("---")
 
-# Navigation Tabs (Added Partner Chat & Messages Tab)
+# Navigation Tabs
 tab1, tab2, tab3, tab4 = st.tabs(["🔍 Matching Engine", "💰 Hour Bank & Credits", "💬 Partner Chat & Messages", "🛡️ AI Excuse & Partner Audit"])
 
 # --- TAB 1: SMART SKILL BARTER MATCHING ENGINE ---
@@ -153,61 +165,110 @@ with tab2:
         else:
             st.warning("Please enter your partner's name first.")
 
-# --- TAB 3: PARTNER CHAT & DIRECT MESSAGING HUB ---
+# --- TAB 3: PARTNER CHAT & DIRECT MESSAGING HUB (WITH VAULT & GALLERY) ---
 with tab3:
     st.header("💬 Partner Chat & Direct Messaging Hub")
-    st.write("Communicate directly with your assigned learning partners in real-time to coordinate sessions and exchange notes.")
+    st.write("Communicate directly with your assigned learning partners, share resources, and track session schedules.")
     
     # Partner selection for chat
     chat_partner = st.selectbox("Select Active Chat Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="chat_partner_select")
+    
+    # --- 3. EMBEDDED SCHEDULE CARD IN CHAT ---
+    st.markdown(f"""
+    <div style='background-color: #f0fdf4; border-left: 5px solid #22c55e; padding: 12px; border-radius: 8px; margin-bottom: 15px;'>
+        <h4>📅 Upcoming Session Schedule</h4>
+        <p><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
+        <p><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Connection State Indicator
     st.markdown(f"🟢 **Connection State:** Connected securely with **{chat_partner}** (Active P2P Encrypted Channel)")
     st.markdown("---")
     
-    # Ensure chat history exists for this partner
+    # Ensure chat history & vaults exist for this partner
     if chat_partner not in st.session_state.chat_messages:
         st.session_state.chat_messages[chat_partner] = [
             {"sender": chat_partner, "text": f"Hello {user_name}! Looking forward to our next skill exchange session."}
         ]
+    if chat_partner not in st.session_state.shared_files:
+        st.session_state.shared_files[chat_partner] = []
+    if chat_partner not in st.session_state.visual_gallery:
+        st.session_state.visual_gallery[chat_partner] = []
+
+    # Layout: Chat stream on left, Document Vault & Gallery on right
+    chat_col, vault_col = st.columns([2, 1])
     
-    # Display conversation thread container
-    chat_container = st.container()
-    with chat_container:
+    with chat_col:
         st.markdown(f"#### Conversation Thread with {chat_partner}")
-        for msg in st.session_state.chat_messages[chat_partner]:
-            sender = msg.get("sender")
-            text = msg.get("text")
-            if sender == user_name:
-                st.markdown(f"<div style='text-align: right; background-color: #e0f2fe; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>You:</b> {text}</div>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<div style='text-align: left; background-color: #f3f4f6; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>{sender}:</b> {text}</div>", unsafe_allow_html=True)
-                
-    st.markdown("---")
-    
-    # Message input form
-    with st.form(key="chat_form", clear_on_submit=True):
-        new_message = st.text_input("Type your message here:", placeholder="Type a message to coordinate your session...")
-        submit_chat = st.form_submit_button("Send Message 📤")
+        chat_container = st.container(height=350)
+        with chat_container:
+            for msg in st.session_state.chat_messages[chat_partner]:
+                sender = msg.get("sender")
+                text = msg.get("text")
+                if sender == user_name:
+                    st.markdown(f"<div style='text-align: right; background-color: #e0f2fe; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>You:</b> {text}</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown(f"<div style='text-align: left; background-color: #f3f4f6; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>{sender}:</b> {text}</div>", unsafe_allow_html=True)
+                    
+        # Message input form
+        with st.form(key="chat_form", clear_on_submit=True):
+            new_message = st.text_input("Type your message here:", placeholder="Type a message to coordinate your session...")
+            submit_chat = st.form_submit_button("Send Message 📤")
+            
+            if submit_chat and new_message:
+                st.session_state.chat_messages[chat_partner].append({"sender": user_name, "text": new_message})
+                st.session_state.chat_messages[chat_partner].append({"sender": chat_partner, "text": f"Got it, {user_name}! Let's confirm."})
+                st.rerun()
+
+    with vault_col:
+        st.markdown("#### 📁 Document Vault & Files")
+        uploaded_file = st.file_uploader("Upload study material", type=["pdf", "png", "jpg", "py", "txt"])
+        if uploaded_file:
+            file_info = {"filename": uploaded_file.name, "uploader": user_name, "size": f"{uploaded_file.size // 1024} KB"}
+            if file_info not in st.session_state.shared_files[chat_partner]:
+                st.session_state.shared_files[chat_partner].append(file_info)
+                st.success(f"Uploaded {uploaded_file.name} successfully!")
         
-        if submit_chat and new_message:
-            # Append user message
-            st.session_state.chat_messages[chat_partner].append({"sender": user_name, "text": new_message})
-            # Simulate automatic polite partner reply for interactive demo experience
-            st.session_state.chat_messages[chat_partner].append({"sender": chat_partner, "text": f"Got it, {user_name}! Let's confirm that schedule."})
-            st.rerun()
+        # Display Downloadable Resource Cards
+        if st.session_state.shared_files[chat_partner]:
+            for f in st.session_state.shared_files[chat_partner]:
+                st.markdown(f"""
+                <div style='background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; margin-bottom: 8px;'>
+                    📄 <b>{f.get('filename')}</b><br>
+                    <small>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
+                    📥 <a href='#' target='_blank'>Download Resource</a>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No files shared yet.")
+
+        st.markdown("---")
+        st.markdown("#### 🖼️ Session Visual Gallery")
+        sketch_title = st.text_input("Visual Title / Sketch Name:", placeholder="e.g., Architecture Diagram")
+        if st.button("Archive Visual Sketch"):
+            if sketch_title:
+                st.session_state.visual_gallery[chat_partner].append({"title": sketch_title, "author": user_name, "type": "Design Canvas"})
+                st.success("Visual archived to gallery!")
+        
+        if st.session_state.visual_gallery[chat_partner]:
+            for vis in st.session_state.visual_gallery[chat_partner]:
+                st.markdown(f"""
+                <div style='background-color: #fef3c7; border: 1px solid #fde68a; padding: 8px; border-radius: 6px; margin-bottom: 6px;'>
+                    🎨 <b>{vis.get('title')}</b><br>
+                    <small>Archived by: {vis.get('author')}</small>
+                </div>
+                """, unsafe_allow_html=True)
 
 # --- TAB 4: AI EXCUSE & PARTNER AUDIT SYSTEM ---
 with tab4:
     st.header("🛡️ Partner Verification & AI Excuse Audit System")
     st.write("Need to reschedule a session? Submit your excuse for dual-layer verification: **Partner Sign-off** & **AI Policy Check**.")
     
-    # Monthly Status Tracker (User)
     current_used = st.session_state.excuse_count
     remaining = max(0, 2 - current_used)
     st.info(f"📅 **User Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
     
-    # --- SIMULATION MODE TOGGLE FOR DEMO VIDEO ---
     st.markdown("### 🎬 Demo Simulation Mode")
     sim_mode = st.radio(
         "Switch View Mode for Demo Recording:",
@@ -240,25 +301,20 @@ with tab4:
     else:
         st.markdown("#### 📥 Step 2: Partner Review & Sign-off (As Partner)")
         
-        # Display Partner Monthly Approval Quota
         p_approvals_used = st.session_state.partner_approval_count
         st.info(f"🛡️ **Partner Governance Quota:** Partner Approvals Used: **{p_approvals_used} of 5** allowed this month.")
         
-        # Safely retrieve pending excuse text and details
         current_pending = st.session_state.get("pending_excuse", {})
         p_user = current_pending.get("user", user_name)
         p_text = current_pending.get("text", "No excuse text provided.")
         p_category = current_pending.get("excuse_type", excuse_type_label)
         
-        # Display clear message showing the excuse from the user
         st.write(f"👤 **Reviewing excuse from {p_user}:** '{p_text}' (Category: *{p_category}*)")
         
-        # Rights Protection Disclaimer
         st.markdown(
             "> ⚖️ **PeerHub Rights Protection Disclaimer:** PeerHub protects your learning rights, giving you the power to carefully review, comment, and explicitly accept or reject your partner's excuse."
         )
         
-        # Custom Written Partner Feedback/Approval Note Input
         partner_feedback_note = st.text_input(
             "Partner's Written Review Note / Reason:", 
             placeholder="e.g., Partner's Review Note: I confirm we agreed on rescheduling this session..."
@@ -314,7 +370,6 @@ with tab4:
     st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
     st.write("Recent peer session accountability audits visible to judges in real-time:")
     
-    # Display Audit Log Table including Partner's Written Note & Verified Demand Status
     st.table(st.session_state.audit_log)
 
 st.markdown("---")
