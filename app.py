@@ -24,11 +24,14 @@ except Exception as e:
 
 # --- SESSION STATE INITIALIZATION ---
 if "excuse_count" not in st.session_state:
-    st.session_state.excuse_count = 1  # 1 used out of 2 allowed per month
+    st.session_state.excuse_count = 1  # User used 1 out of 2 allowed per month
+
+if "partner_approval_count" not in st.session_state:
+    st.session_state.partner_approval_count = 3  # Partner used 3 out of 5 allowed per month
 
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = [
-        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Approved by Partner & AI", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
+        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Verified Rescheduling Demand", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
     ]
 
 if "pending_excuse" not in st.session_state:
@@ -139,10 +142,10 @@ with tab3:
     st.header("🛡️ Partner Verification & AI Excuse Audit System")
     st.write("Need to reschedule a session? Submit your excuse for dual-layer verification: **Partner Sign-off** & **AI Policy Check**.")
     
-    # Monthly Status Tracker
+    # Monthly Status Tracker (User)
     current_used = st.session_state.excuse_count
     remaining = max(0, 2 - current_used)
-    st.info(f"📅 **Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
+    st.info(f"📅 **User Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
     
     # --- SIMULATION MODE TOGGLE FOR DEMO VIDEO ---
     st.markdown("### 🎬 Demo Simulation Mode")
@@ -177,6 +180,10 @@ with tab3:
     else:
         st.markdown("#### 📥 Step 2: Partner Review & Sign-off (As Partner)")
         
+        # Display Partner Monthly Approval Quota
+        p_approvals_used = st.session_state.partner_approval_count
+        st.info(f"🛡️ **Partner Governance Quota:** Partner Approvals Used: **{p_approvals_used} of 5** allowed this month.")
+        
         # Safely retrieve pending excuse text and details
         current_pending = st.session_state.get("pending_excuse", {})
         p_user = current_pending.get("user", user_name)
@@ -184,7 +191,7 @@ with tab3:
         p_category = current_pending.get("excuse_type", excuse_type_label)
         
         # Display clear message showing the excuse from the user
-        st.info(f"👤 **Reviewing excuse from {p_user}:** '{p_text}' (Category: *{p_category}*)")
+        st.write(f"👤 **Reviewing excuse from {p_user}:** '{p_text}' (Category: *{p_category}*)")
         
         # Rights Protection Disclaimer
         st.markdown(
@@ -203,28 +210,34 @@ with tab3:
                 if not partner_feedback_note:
                     st.warning("Please write a custom approval note before submitting.")
                 else:
-                    reason_lower = p_text.lower()
-                    weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
-                    is_weak = any(w in reason_lower for w in weak_triggers)
-                    
-                    if st.session_state.excuse_count >= 2:
-                        st.error("🚨 **Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
-                        st.session_state.audit_log.insert(0, {
-                            "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                            "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded",
-                            "partner_note": partner_feedback_note
-                        })
-                    elif is_weak:
-                        st.warning("⚠️ **AI Audit Flagged:** Approved by partner, but flagged by AI as weak reason.")
+                    # Check partner approval limit (Max 5 approvals per partner per month)
+                    if st.session_state.partner_approval_count >= 5:
+                        st.error("🚨 **Partner Monthly Approval Limit Reached (5/5).**")
+                        st.warning("To protect learning commitments, extra reschedules require direct platform mediation or standard penalty rules.")
                     else:
-                        st.session_state.excuse_count += 1
-                        st.success("✅ **Approved by Partner & AI Policy Check!** Zero credit penalty. Badge protected.")
-                        st.session_state.audit_log.insert(0, {
-                            "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                            "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Approved by Partner & AI",
-                            "partner_note": partner_feedback_note
-                        })
-                        st.balloons()
+                        reason_lower = p_text.lower()
+                        weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
+                        is_weak = any(w in reason_lower for w in weak_triggers)
+                        
+                        if st.session_state.excuse_count >= 2:
+                            st.error("🚨 **User Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
+                            st.session_state.audit_log.insert(0, {
+                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
+                                "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded",
+                                "partner_note": partner_feedback_note
+                            })
+                        elif is_weak:
+                            st.warning("⚠️ **AI Audit Flagged:** Approved by partner, but flagged by AI as weak reason.")
+                        else:
+                            st.session_state.excuse_count += 1
+                            st.session_state.partner_approval_count += 1
+                            st.success("✅ **Verified Rescheduling Demand Approved!** Both users are bound to the makeup session time. Zero credit penalty.")
+                            st.session_state.audit_log.insert(0, {
+                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
+                                "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Verified Rescheduling Demand",
+                                "partner_note": partner_feedback_note
+                            })
+                            st.balloons()
                     
         with col_p2:
             if st.button("❌ Reject & Flag"):
@@ -242,7 +255,7 @@ with tab3:
     st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
     st.write("Recent peer session accountability audits visible to judges in real-time:")
     
-    # Display Audit Log Table including Partner's Written Note
+    # Display Audit Log Table including Partner's Written Note & Verified Demand Status
     st.table(st.session_state.audit_log)
 
 st.markdown("---")
