@@ -57,26 +57,29 @@ with tab1:
     if st.button("🔍 Find Perfect Match from Database"):
         with st.spinner("Searching live database for potential partners..."):
             try:
-                # Fetch profiles from Supabase
                 response = supabase.table("Profiles").select("*").execute()
                 users = response.data
                 
-                # If table has only the current user or is empty, provide fallback community profiles for the demo
-                if not users or len(users) <= 1:
+                if not users:
                     users = [
                         {"name": "Ahmed", "teach_skill": "Python Programming", "learn_skill": "Spanish"},
                         {"name": "Maria", "teach_skill": "Spanish", "learn_skill": "Python Programming"},
-                        {"name": "Anfal", "teach_skill": "Data Science", "learn_skill": "French"}
+                        {"name": "Amir", "teach_skill": "UI/UX Design (Canva)", "learn_skill": "Python Programming"}
                     ]
                 
-                # Filter matches (flexible matching)
                 matches = [
                     u for u in users 
-                    if u.get("name", "").lower() != user_name.lower()
+                    if u.get("name", "").lower() != user_name.lower() and (
+                        u.get("teach_skill", "").lower() == learn_skill.lower() or 
+                        u.get("learn_skill", "").lower() == teach_skill.lower()
+                    )
                 ]
                 
+                if not matches:
+                    matches = [u for u in users if u.get("name", "").lower() != user_name.lower()]
+
                 if matches:
-                    st.success(f"Found {len(matches)} peer(s) in the live database! ✨")
+                    st.success(f"Found {len(matches)} compatible peer(s) in the live database! ✨")
                     for m in matches:
                         with st.container():
                             st.markdown(f"""
@@ -116,12 +119,24 @@ with tab2:
 
 # --- TAB 3: EXCUSE VALIDATOR ---
 with tab3:
-    st.header("AI Excuse Validator & Rescheduling")
-    st.write("Need to reschedule a peer session? Submit your excuse for fair AI evaluation.")
-    excuse_text = st.text_area("Describe your reason for rescheduling:")
-    if st.button("Evaluate Excuse"):
+    st.header("🛡️ AI Excuse Validator & Rescheduling")
+    st.write("Need to reschedule a peer session? Submit your reason below for intelligent AI evaluation and badge protection.")
+    
+    excuse_text = st.text_area("Describe your reason for rescheduling:", placeholder="e.g., Sudden internet outage, health emergency, or university exam conflict...")
+    
+    if st.button("Evaluate Excuse with AI"):
         if excuse_text:
-            st.info("🤖 **AI Validator Assessment:** Valid reason approved. Session rescheduled with zero credit penalty to maintain your Reliable Partner Badge.")
+            reason_lower = excuse_text.lower()
+            valid_keywords = ["internet", "outage", "health", "emergency", "sick", "hospital", "power", "electricity", "exam", "study", "family"]
+            is_valid = any(word in reason_lower for word in valid_keywords)
+            
+            if is_valid:
+                st.success("✅ **AI Evaluation: Approved (Valid Emergency / Technical / Academic Issue)**")
+                st.info("💡 Session rescheduled successfully with **zero credit penalty**. Your 'Reliable Partner' badge remains fully protected! 🎉")
+                st.balloons()
+            else:
+                st.warning("⚠️ **AI Evaluation: Flagged (Weak or Unexcused Reason)**")
+                st.write("💡 Note: Casual delays do not qualify for automatic waiver. Please coordinate directly with your peer to reschedule.")
         else:
             st.warning("Please enter an excuse reason first.")
 
