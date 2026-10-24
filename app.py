@@ -24,13 +24,11 @@ except Exception as e:
 
 # --- SESSION STATE INITIALIZATION ---
 if "excuse_count" not in st.session_state:
-    st.session_state.excuse_count = 2  # Set to 2 for testing limits based on current view
+    st.session_state.excuse_count = 1  # 1 used out of 2 allowed per month
 
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = [
-        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage / Technical", "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded", "partner_note": "Partner's Review Note: Limit exceeded for this month."},
-        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "2/2", "status": "Approved by Partner & AI", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."},
-        {"user": "Ahmed", "partner": "Amir", "excuse_type": "Exam Conflict", "monthly_count": "1/2", "status": "Approved by Partner & AI", "partner_note": "Partner's Review Note: Verified university exam schedule."}
+        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Approved by Partner & AI", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
     ]
 
 # --- SIDEBAR & USER PROFILE SETUP ---
@@ -138,18 +136,24 @@ with tab3:
     remaining = max(0, 2 - current_used)
     st.info(f"📅 **Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
     
+    # --- SIMULATION MODE TOGGLE FOR DEMO VIDEO ---
+    st.markdown("### 🎬 Demo Simulation Mode")
+    sim_mode = st.radio(
+        "Switch View Mode for Demo Recording:",
+        ["1. User View: Submit Excuse & Request Rescheduling", "2. Partner View: Review & Write Custom Note"],
+        horizontal=True
+    )
+    
     col_a, col_b = st.columns(2)
     with col_a:
         assigned_partner = st.selectbox("Select Your Learning Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"])
     with col_b:
         excuse_type_label = st.selectbox("Excuse Category:", ["Internet Outage / Technical", "Health Emergency / Sick", "University Exam / Academic", "Family Emergency"])
     
-    excuse_text = st.text_area("Describe reason for rescheduling:", placeholder="e.g., Sudden power outage and internet disconnection...")
-    
-    st.markdown("#### 👥 Two-Step Verification Workflow")
-    verification_step = st.radio("Simulation Mode (Role Switch):", ["1. Submit Excuse (User)", "2. Partner Review & Sign-off"])
-    
-    if verification_step == "1. Submit Excuse (User)":
+    if sim_mode.startswith("1"):
+        st.markdown("#### 📤 Step 1: Submit Excuse (As User)")
+        excuse_text = st.text_area("Describe reason for rescheduling:", placeholder="e.g., Sudden power outage and internet disconnection...")
+        
         if st.button("Submit for Partner & AI Audit"):
             if excuse_text:
                 st.session_state.pending_excuse = {
@@ -158,11 +162,12 @@ with tab3:
                     "excuse_type": excuse_type_label,
                     "text": excuse_text
                 }
-                st.warning(f"⏳ **Status: Pending Partner Verification.** Sent to **{assigned_partner}** for review.")
+                st.success(f"⏳ **Status: Pending Partner Verification.** Excuse sent to **{assigned_partner}** successfully! Switch to *Partner View* above to review and sign off.")
             else:
                 st.warning("Please describe your reason first.")
                 
-    elif verification_step == "2. Partner Review & Sign-off":
+    else:
+        st.markdown("#### 📥 Step 2: Partner Review & Sign-off (As Partner)")
         st.info(f"👤 Logged in as Partner (**{assigned_partner}** reviewing request from **{user_name}**):")
         
         # Rights Protection Disclaimer
@@ -182,7 +187,8 @@ with tab3:
                 if not partner_feedback_note:
                     st.warning("Please write a custom approval note before submitting.")
                 else:
-                    reason_lower = excuse_text.lower() if 'excuse_text' in locals() else ""
+                    pending_text = st.session_state.get("pending_excuse", {}).get("text", "Internet outage")
+                    reason_lower = pending_text.lower()
                     weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
                     is_weak = any(w in reason_lower for w in weak_triggers)
                     
