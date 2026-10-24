@@ -25,8 +25,8 @@ except Exception as e:
 # --- SIDEBAR & USER PROFILE SETUP ---
 st.sidebar.markdown("## 📝 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
-teach_skill = st.sidebar.text_input("What skill can you teach?", "spanish")
-learn_skill = st.sidebar.text_input("What skill do you want to learn?", "Python Programmin")
+teach_skill = st.sidebar.text_input("What skill can you teach?", "Python Programmin")
+learn_skill = st.sidebar.text_input("What skill do you want to learn?", "Spanish")
 
 if st.sidebar.button("Save Profile to Cloud"):
     try:
