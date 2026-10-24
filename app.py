@@ -35,6 +35,18 @@ if "user_credits" not in st.session_state:
 if "completed_sessions" not in st.session_state:
     st.session_state.completed_sessions = 4
 
+if "user_bio" not in st.session_state:
+    st.session_state.user_bio = "Third-year university student studying Commercial Sciences & International Trade. Passionate about Python, languages, and digital marketing."
+
+if "user_level" not in st.session_state:
+    st.session_state.user_level = "Intermediate"
+
+if "linkedin_link" not in st.session_state:
+    st.session_state.linkedin_link = "linkedin.com/in/feriel-boukhit"
+
+if "github_link" not in st.session_state:
+    st.session_state.github_link = "github.com/ferielboukhit3-hash"
+
 if "chat_messages" not in st.session_state:
     st.session_state.chat_messages = {
         "Maria": [
@@ -71,7 +83,7 @@ if "pending_excuse" not in st.session_state:
         "text": "Sudden internet outage and power cut before session."
     }
 
-# --- MINIMALIST & CLEAN CSS STYLING ---
+# --- MINIMALIST & REFINED CSS STYLING ---
 st.markdown("""
     <style>
     .main {
@@ -87,7 +99,7 @@ st.markdown("""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .stButton>button {
-        background-color: #3F72AF;
+        background-color: #0028BB;
         color: white;
         border-radius: 6px;
         padding: 0.45rem 1.2rem;
@@ -99,13 +111,49 @@ st.markdown("""
         background-color: #1B1F3B;
         color: white;
     }
+    .profile-banner {
+        background: linear-gradient(135deg, #1B1F3B 0%, #3F72AF 100%);
+        height: 140px;
+        border-radius: 10px 10px 0 0;
+        padding: 20px;
+        color: white;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# --- SIDEBAR: APP LOGO & PROFILE CONFIGURATION ---
+# --- SIDEBAR: APP LOGO & PROFILE SETUP & NAVIGATION ---
 st.sidebar.markdown("# 🤝 PeerHub")
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 👤 User Profile Setup")
+
+# Quick Profile Shortcut Button in Sidebar
+if st.sidebar.button("👤 Open My Profile Page"):
+    st.session_state.nav_page = "👤 My Profile"
+
+st.sidebar.markdown("### 🧭 Platform Navigation")
+default_page_index = 0
+if "nav_page" in st.session_state:
+    pages_list = ["🏠 Home & Overview", "👤 My Profile", "🔍 Smart Matching Engine", "💰 Hour Bank & Credits", "💬 Partner Chat & Direct Hub", "🛡️ AI Excuse & Partner Audit"]
+    if st.session_state.nav_page in pages_list:
+        default_page_index = pages_list.index(st.session_state.nav_page)
+
+page = st.sidebar.radio(
+    "Go to page:",
+    [
+        "🏠 Home & Overview", 
+        "👤 My Profile", 
+        "🔍 Smart Matching Engine", 
+        "💰 Hour Bank & Credits", 
+        "💬 Partner Chat & Direct Hub", 
+        "🛡️ AI Excuse & Partner Audit"
+    ],
+    index=default_page_index
+)
+
+# Keep session state in sync
+st.session_state.nav_page = page
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### Quick Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
 teach_skill = st.sidebar.selectbox("What skill can you teach?", ["Python Programming", "Spanish", "UI/UX Design (Canva)", "French"])
 learn_skill = st.sidebar.selectbox("What skill do you want to learn?", ["Spanish", "Python Programming", "English", "Data Science"])
@@ -121,20 +169,6 @@ if st.sidebar.button("Save Profile to Cloud"):
         st.sidebar.success("Profile saved successfully to Supabase! 🎉")
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
-
-# --- NAVIGATION VIA SIDEBAR RADIO ---
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 🧭 Platform Navigation")
-page = st.sidebar.radio(
-    "Go to page:",
-    [
-        "🏠 Home & Overview", 
-        "🔍 Smart Matching Engine", 
-        "💰 Hour Bank & Credits", 
-        "💬 Partner Chat & Direct Hub", 
-        "🛡️ AI Excuse & Partner Audit"
-    ]
-)
 
 # --- PAGE 1: HOME & OVERVIEW ---
 if page == "🏠 Home & Overview":
@@ -154,9 +188,66 @@ if page == "🏠 Home & Overview":
         st.write("AI-powered excuse validation combined with partner sign-off quotas to protect community reliability.")
     
     st.markdown("---")
-    st.info(f"👋 Hello **{user_name}**! Use the sidebar navigation above to explore the platform pages. **{db_status}**")
+    st.info(f"👋 Hello **{user_name}**! Use the sidebar navigation or click **Open My Profile Page** above to view your profile. **{db_status}**")
 
-# --- PAGE 2: SMART MATCHING ENGINE ---
+# --- PAGE 2: USER PROFILE PAGE (NEW HIGH-END DESIGN) ---
+elif page == "👤 My Profile":
+    # Custom Cover Banner
+    st.markdown("""
+        <div class="profile-banner">
+            <h2>👤 User Profile & Learning Portfolio</h2>
+            <p>Manage your professional background, skill levels, earned badges, and community reputation.</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Layout: Avatar & Quick Stats on Left, Editable Info on Right
+    prof_col1, prof_col2 = st.columns([1, 2])
+    
+    with prof_col1:
+        st.markdown(f"""
+        <div style='background-color: white; padding: 20px; border-radius: 10px; border: 1px solid #E2E8F0; text-align: center;'>
+            <h3>👩‍💻 {user_name}</h3>
+            <p style='color: #64748B;'>University Student & International Trade</p>
+            <hr>
+            <h4>🏆 Earned Badges</h4>
+            <span style='background-color: #0028BB; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;'>Reliable Partner ⭐</span><br><br>
+            <span style='background-color: #9300ED; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;'>Streak Master 🔥</span><br><br>
+            <span style='background-color: #3F72AF; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;'>Python Pro 🐍</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with prof_col2:
+        st.markdown("### 📊 Quick Performance Stats")
+        q1, q2, q3 = st.columns(3)
+        q1.metric("Completed Sessions", f"{st.session_state.completed_sessions}", "100%")
+        q2.metric("Hours Earned", f"{st.session_state.user_credits} hrs", "+1 this week")
+        q3.metric("Peer Rating", "4.9 / 5.0", "⭐ Top Rated")
+        
+        st.markdown("---")
+        st.markdown("### 📝 Bio & Professional Background")
+        updated_bio = st.text_area("About Me:", value=st.session_state.user_bio, height=100)
+        st.session_state.user_bio = updated_bio
+        
+        st.markdown("### 🎓 Expertise & Proficiency Levels")
+        col_ex1, col_ex2 = st.columns(2)
+        with col_ex1:
+            st.selectbox("Teaching Skill Level:", ["Beginner", "Intermediate", "Advanced", "Expert"], index=2)
+        with col_ex2:
+            st.selectbox("Learning Skill Level:", ["Beginner", "Intermediate", "Advanced"], index=1)
+            
+        st.markdown("### 🔗 Professional & Social Links")
+        li_link = st.text_input("LinkedIn Profile URL:", value=st.session_state.linkedin_link)
+        gh_link = st.text_input("GitHub Profile URL:", value=st.session_state.github_link)
+        st.session_state.linkedin_link = li_link
+        st.session_state.github_link = gh_link
+        
+        if st.button("💾 Save Profile Changes"):
+            st.success("✅ Profile changes successfully saved and synced with cloud session state!")
+            st.balloons()
+
+# --- PAGE 3: SMART MATCHING ENGINE ---
 elif page == "🔍 Smart Matching Engine":
     st.header("🔍 Smart Skill Barter Matching Dashboard")
     st.write(f"Welcome back, **{user_name}**! {db_status}")
@@ -196,7 +287,7 @@ elif page == "🔍 Smart Matching Engine":
             except Exception as e:
                 st.error(f"Could not fetch matches from database: {e}")
 
-# --- PAGE 3: HOUR BANK & CREDITS ---
+# --- PAGE 4: HOUR BANK & CREDITS ---
 elif page == "💰 Hour Bank & Credits":
     st.header("💰 Hour Bank & Skill Credits")
     st.write(f"Track your earned hours and exchange value transparently within PeerHub, **{user_name}**.")
@@ -220,7 +311,7 @@ elif page == "💰 Hour Bank & Credits":
         else:
             st.warning("Please enter your partner's name first.")
 
-# --- PAGE 4: PARTNER CHAT & DIRECT HUB ---
+# --- PAGE 5: PARTNER CHAT & DIRECT HUB ---
 elif page == "💬 Partner Chat & Direct Hub":
     st.header("💬 Partner Chat & Direct Messaging Hub")
     st.write("Communicate directly with your assigned learning partners, share resources, and track session schedules.")
@@ -228,7 +319,7 @@ elif page == "💬 Partner Chat & Direct Hub":
     chat_partner = st.selectbox("Select Active Chat Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="chat_partner_select")
     
     st.markdown(f"""
-    <div style='background-color: #E2E8F0; border-left: 5px solid #3F72AF; padding: 14px; border-radius: 8px; margin-bottom: 15px;'>
+    <div style='background-color: #E2E8F0; border-left: 5px solid #0028BB; padding: 14px; border-radius: 8px; margin-bottom: 15px;'>
         <h4 style='color: #1B1F3B !important; margin-bottom: 5px;'>📅 Upcoming Session Schedule</h4>
         <p style='color: #1B1F3B; margin: 2px 0;'><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
         <p style='color: #1B1F3B; margin: 2px 0;'><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
@@ -284,141 +375,3 @@ elif page == "💬 Partner Chat & Direct Hub":
                 st.markdown(f"""
                 <div style='background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
                     📄 <b>{f.get('filename')}</b><br>
-                    <small style='color: #64748B;'>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
-                    📥 <a href='#' target='_blank' style='color: #3F72AF; text-decoration: none;'>Download Resource</a>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.info("No files shared yet.")
-
-        st.markdown("---")
-        st.markdown("#### 🖼️ Session Visual Gallery")
-        sketch_title = st.text_input("Visual Title / Sketch Name:", placeholder="e.g., Architecture Diagram")
-        if st.button("Archive Visual Sketch"):
-            if sketch_title:
-                st.session_state.visual_gallery[chat_partner].append({"title": sketch_title, "author": user_name, "type": "Design Canvas"})
-                st.success("Visual archived to gallery!")
-        
-        if st.session_state.visual_gallery[chat_partner]:
-            for vis in st.session_state.visual_gallery[chat_partner]:
-                st.markdown(f"""
-                <div style='background-color: #FFFFFF; border: 1px solid #CBD5E1; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
-                    🎨 <b>{vis.get('title')}</b><br>
-                    <small style='color: #64748B;'>Archived by: {vis.get('author')}</small>
-                </div>
-                """, unsafe_allow_html=True)
-
-# --- PAGE 5: AI EXCUSE & PARTNER AUDIT ---
-elif page == "🛡️ AI Excuse & Partner Audit":
-    st.header("🛡️ Partner Verification & AI Excuse Audit System")
-    st.write("Need to reschedule a session? Submit your excuse for dual-layer verification: **Partner Sign-off** & **AI Policy Check**.")
-    
-    current_used = st.session_state.excuse_count
-    remaining = max(0, 2 - current_used)
-    st.info(f"📅 **User Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
-    
-    st.markdown("### 🎬 Demo Simulation Mode")
-    sim_mode = st.radio(
-        "Switch View Mode for Demo Recording:",
-        ["1. User View: Submit Excuse & Request Rescheduling", "2. Partner View: Review & Write Custom Note"],
-        horizontal=True
-    )
-    
-    col_a, col_b = st.columns(2)
-    with col_a:
-        assigned_partner = st.selectbox("Select Your Learning Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="audit_partner_select")
-    with col_b:
-        excuse_type_label = st.selectbox("Excuse Category:", ["Internet Outage / Technical", "Health Emergency / Sick", "University Exam / Academic", "Family Emergency"])
-    
-    if sim_mode.startswith("1"):
-        st.markdown("#### 📤 Step 1: Submit Excuse (As User)")
-        excuse_text = st.text_area("Describe reason for rescheduling:", placeholder="e.g., Sudden power outage and internet disconnection...")
-        
-        if st.button("Submit for Partner & AI Audit"):
-            if excuse_text:
-                st.session_state.pending_excuse = {
-                    "user": user_name,
-                    "partner": assigned_partner,
-                    "excuse_type": excuse_type_label,
-                    "text": excuse_text
-                }
-                st.success(f"⏳ **Status: Pending Partner Verification.** Excuse sent to **{assigned_partner}** successfully! Switch to *Partner View* above to review and sign off.")
-            else:
-                st.warning("Please describe your reason first.")
-                
-    else:
-        st.markdown("#### 📥 Step 2: Partner Review & Sign-off (As Partner)")
-        
-        p_approvals_used = st.session_state.partner_approval_count
-        st.info(f"🛡️ **Partner Governance Quota:** Partner Approvals Used: **{p_approvals_used} of 5** allowed this month.")
-        
-        current_pending = st.session_state.get("pending_excuse", {})
-        p_user = current_pending.get("user", user_name)
-        p_text = current_pending.get("text", "No excuse text provided.")
-        p_category = current_pending.get("excuse_type", excuse_type_label)
-        
-        st.write(f"👤 **Reviewing excuse from {p_user}:** '{p_text}' (Category: *{p_category}*)")
-        
-        st.markdown(
-            "> ⚖️ **PeerHub Rights Protection Disclaimer:** PeerHub protects your learning rights, giving you the power to carefully review, comment, and explicitly accept or reject your partner's excuse."
-        )
-        
-        partner_feedback_note = st.text_input(
-            "Partner's Written Review Note / Reason:", 
-            placeholder="e.g., Partner's Review Note: I confirm we agreed on rescheduling this session..."
-        )
-        
-        col_p1, col_p2 = st.columns(2)
-        with col_p1:
-            if st.button("✅ Approve Partner Rescheduling"):
-                if not partner_feedback_note:
-                    st.warning("Please write a custom approval note before submitting.")
-                else:
-                    if st.session_state.partner_approval_count >= 5:
-                        st.error("🚨 **Partner Monthly Approval Limit Reached (5/5).**")
-                        st.warning("To protect learning commitments, extra reschedules require direct platform mediation or standard penalty rules.")
-                    else:
-                        reason_lower = p_text.lower()
-                        weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
-                        is_weak = any(w in reason_lower for w in weak_triggers)
-                        
-                        if st.session_state.excuse_count >= 2:
-                            st.error("🚨 **User Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
-                            st.session_state.audit_log.insert(0, {
-                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                                "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded",
-                                "partner_note": partner_feedback_note
-                            })
-                        elif is_weak:
-                            st.warning("⚠️ **AI Audit Flagged:** Approved by partner, but flagged by AI as weak reason.")
-                        else:
-                            st.session_state.excuse_count += 1
-                            st.session_state.partner_approval_count += 1
-                            st.success("✅ **Verified Rescheduling Demand Approved!** Both users are bound to the makeup session time. Zero credit penalty.")
-                            st.session_state.audit_log.insert(0, {
-                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                                "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Verified Rescheduling Demand",
-                                "partner_note": partner_feedback_note
-                            })
-                            st.balloons()
-                    
-        with col_p2:
-            if st.button("❌ Reject & Flag"):
-                if not partner_feedback_note:
-                    st.warning("Please write a custom rejection note explaining why.")
-                else:
-                    st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
-                    st.session_state.audit_log.insert(0, {
-                        "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                        "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner",
-                        "partner_note": partner_feedback_note
-                    })
-
-    st.markdown("---")
-    st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
-    st.write("Recent peer session accountability audits visible to judges in real-time:")
-    
-    st.table(st.session_state.audit_log)
-
-st.markdown("---")
-st.markdown("<p style='text-align: center; color: #64748B;'>PeerHub Full-Stack App — Powered by Supabase & Streamlit (Thirduni - October 2026)</p>", unsafe_allow_html=True)
