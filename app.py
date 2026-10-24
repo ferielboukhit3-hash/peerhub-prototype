@@ -25,25 +25,18 @@ except Exception as e:
 # --- SESSION STATE INITIALIZATION ---
 if "excuse_count" not in st.session_state:
     st.session_state.excuse_count = 1
-
 if "partner_approval_count" not in st.session_state:
     st.session_state.partner_approval_count = 3
-
 if "user_credits" not in st.session_state:
     st.session_state.user_credits = 5
-
 if "completed_sessions" not in st.session_state:
     st.session_state.completed_sessions = 4
-
 if "user_bio" not in st.session_state:
     st.session_state.user_bio = "Third-year university student studying Commercial Sciences & International Trade at University of Algiers 3. Passionate about Python, languages, digital marketing, and international economic diplomacy."
-
 if "user_headline" not in st.session_state:
     st.session_state.user_headline = "International Trade Student & Aspiring Full-Stack Developer | PeerHub Community Member"
-
 if "linkedin_link" not in st.session_state:
     st.session_state.linkedin_link = "linkedin.com/in/feriel-boukhit"
-
 if "github_link" not in st.session_state:
     st.session_state.github_link = "github.com/ferielboukhit3-hash"
 
@@ -72,7 +65,14 @@ if "visual_gallery" not in st.session_state:
 
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = [
-        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Verified Rescheduling Demand", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
+        {
+            "user": "Feriel",
+            "partner": "Maria",
+            "excuse_type": "Internet Outage",
+            "monthly_count": "1/2",
+            "status": "Verified Rescheduling Demand",
+            "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."
+        }
     ]
 
 if "pending_excuse" not in st.session_state:
@@ -83,9 +83,9 @@ if "pending_excuse" not in st.session_state:
         "text": "Sudden internet outage and power cut before session."
     }
 
-# --- MINIMALIST & LINKEDIN-INSPIRED CSS STYLING ---
+# --- MINIMALIST & PROFESSIONAL CSS STYLING ---
 st.markdown("""
-    <style>
+<style>
     .main {
         background-color: #F3F3F4;
     }
@@ -102,7 +102,7 @@ st.markdown("""
         background-color: #0A66C2;
         color: white;
         border-radius: 6px;
-        padding: 0.45rem 1.2rem;
+        padding: 0.5rem 1.2rem;
         font-weight: 500;
         border: none;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -114,32 +114,32 @@ st.markdown("""
     .linkedin-card {
         background-color: white;
         padding: 24px;
-        border-radius: 10px;
+        border-radius: 12px;
         border: 1px solid #E2E8F0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         margin-bottom: 20px;
     }
     .linkedin-banner {
         background: linear-gradient(135deg, #0A66C2 0%, #1B1F3B 100%);
-        height: 160px;
-        border-radius: 10px 10px 0 0;
+        height: 140px;
+        border-radius: 12px 12px 0 0;
         padding: 20px;
         color: white;
     }
     .skill-pill {
         background-color: #E2E8F0;
         color: #1B1F3B;
-        padding: 4px 12px;
+        padding: 6px 14px;
         border-radius: 16px;
         font-size: 0.85rem;
         display: inline-block;
-        margin: 3px;
+        margin: 4px;
         font-weight: 500;
     }
-    </style>
+</style>
 """, unsafe_allow_html=True)
 
-# --- SIDEBAR: APP LOGO & PROFILE SETUP & NAVIGATION ---
+# --- SIDEBAR: NAVIGATION & SETUP ---
 st.sidebar.markdown("# 🤝 PeerHub")
 st.sidebar.markdown("---")
 
@@ -149,23 +149,29 @@ if st.sidebar.button("👤 Open My Profile Page"):
 st.sidebar.markdown("### 🧭 Platform Navigation")
 default_page_index = 0
 if "nav_page" in st.session_state:
-    pages_list = ["🏠 Home & Overview", "👤 My Profile", "🔍 Smart Matching Engine", "💰 Hour Bank & Credits", "💬 Partner Chat & Direct Hub", "🛡️ AI Excuse & Partner Audit"]
+    pages_list = [
+        "🏠 Home & Overview",
+        "👤 My Profile",
+        "🔍 Smart Matching Engine",
+        "💰 Hour Bank & Credits",
+        "💬 Partner Chat & Direct Hub",
+        "🛡️ AI Excuse & Partner Audit"
+    ]
     if st.session_state.nav_page in pages_list:
         default_page_index = pages_list.index(st.session_state.nav_page)
 
 page = st.sidebar.radio(
     "Go to page:",
     [
-        "🏠 Home & Overview", 
-        "👤 My Profile", 
-        "🔍 Smart Matching Engine", 
-        "💰 Hour Bank & Credits", 
-        "💬 Partner Chat & Direct Hub", 
+        "🏠 Home & Overview",
+        "👤 My Profile",
+        "🔍 Smart Matching Engine",
+        "💰 Hour Bank & Credits",
+        "💬 Partner Chat & Direct Hub",
         "🛡️ AI Excuse & Partner Audit"
     ],
     index=default_page_index
 )
-
 st.session_state.nav_page = page
 
 st.sidebar.markdown("---")
@@ -186,6 +192,7 @@ if st.sidebar.button("Save Profile to Cloud"):
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
 
+
 # --- PAGE 1: HOME & OVERVIEW ---
 if page == "🏠 Home & Overview":
     st.markdown("<h1 style='text-align: center; color: #1B1F3B;'>Welcome to PeerHub 🚀</h1>", unsafe_allow_html=True)
@@ -202,81 +209,75 @@ if page == "🏠 Home & Overview":
     with col_h3:
         st.markdown("### 🛡️ Fair Governance")
         st.write("AI-powered excuse validation combined with partner sign-off quotas to protect community reliability.")
-    
+        
     st.markdown("---")
     st.info(f"👋 Hello **{user_name}**! Use the sidebar navigation or click **Open My Profile Page** above to view your profile. **{db_status}**")
 
-# --- PAGE 2: LINKEDIN-INSPIRED USER PROFILE PAGE ---
+
+# --- PAGE 2: USER PROFILE PAGE ---
 elif page == "👤 My Profile":
-    # 1. LinkedIn Cover Banner & Header Card
     st.markdown("""
         <div class="linkedin-banner">
             <h2>💼 Professional Learning Portfolio</h2>
-            <p>Structured & structured like a professional LinkedIn networking profile.</p>
+            <p>Structured & designed like a professional networking profile.</p>
         </div>
     """, unsafe_allow_html=True)
-    
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Main Profile Top Card (LinkedIn Style)
     st.markdown(f"""
-    <div class="linkedin-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-                <h1 style="margin: 0; color: #1B1F3B;">👩‍💻 {user_name}</h1>
-                <p style="font-size: 1.05rem; color: #475569; margin: 4px 0;">{st.session_state.user_headline}</p>
-                <p style="color: #64748B; font-size: 0.9rem; margin: 2px 0;">📍 Algiers, Algeria · <span style="color: #0A66C2; font-weight: 600;">500+ Peer Connections</span></p>
-            </div>
-            <div style="text-align: right;">
-                <span style="background-color: #0A66C2; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">Verified Member 🟢</span>
+        <div class="linkedin-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1 style="margin: 0; color: #1B1F3B;">👩‍💻 {user_name}</h1>
+                    <p style="font-size: 1.05rem; color: #475569; margin: 4px 0;">{st.session_state.user_headline}</p>
+                    <p style="color: #64748B; font-size: 0.9rem; margin: 2px 0;">📍 Algiers, Algeria · <span style="color: #0A66C2; font-weight: 600;">500+ Peer Connections</span></p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="background-color: #0A66C2; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">Verified Member 🟢</span>
+                </div>
             </div>
         </div>
-    </div>
     """, unsafe_allow_html=True)
-    
-    # Two-Column Layout (LinkedIn feed style)
+
     col_main, col_side = st.columns([2, 1])
     
     with col_main:
-        # 2. About Section (Bio)
         st.markdown("""
-        <div class="linkedin-card">
-            <h3>📝 About</h3>
+            <div class="linkedin-card">
+                <h3>📝 About</h3>
         """, unsafe_allow_html=True)
         updated_bio = st.text_area("Edit your professional summary:", value=st.session_state.user_bio, height=120)
         st.session_state.user_bio = updated_bio
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # 3. Skills & Endorsements Section
         st.markdown("""
-        <div class="linkedin-card">
-            <h3>💡 Skills & Expertise</h3>
-            <p style="color: #64748B; font-size: 0.9rem;">Verified by peer exchanges and academic coursework.</p>
+            <div class="linkedin-card">
+                <h3>💡 Skills & Expertise</h3>
+                <p style="color: #64748B; font-size: 0.9rem;">Verified by peer exchanges and academic coursework.</p>
         """, unsafe_allow_html=True)
         
         st.markdown("""
-        <div>
-            <span class="skill-pill">Python Programming (Intermediate)</span>
-            <span class="skill-pill">International Trade & Macroeconomics</span>
-            <span class="skill-pill">Digital Marketing & E-Commerce</span>
-            <span class="skill-pill">UI/UX Design (Canva)</span>
-            <span class="skill-pill">French & English Fluency</span>
-            <span class="skill-pill">Spanish (B1)</span>
-        </div>
+            <div>
+                <span class="skill-pill">Python Programming (Intermediate)</span>
+                <span class="skill-pill">International Trade & Macroeconomics</span>
+                <span class="skill-pill">Digital Marketing & E-Commerce</span>
+                <span class="skill-pill">UI/UX Design (Canva)</span>
+                <span class="skill-pill">French & English Fluency</span>
+                <span class="skill-pill">Spanish (B1)</span>
+            </div>
         """, unsafe_allow_html=True)
         
         col_sk1, col_sk2 = st.columns(2)
         with col_sk1:
-            st.selectbox("Primary Teaching Skill:", ["Python Programming", "Spanish", "UI/UX Design (Canva)", "French"], index=0)
+            st.selectbox("Primary Teaching Skill Level:", ["Beginner", "Intermediate", "Expert"], index=1)
         with col_sk2:
-            st.selectbox("Primary Learning Goal:", ["Spanish", "Python Programming", "English", "Data Science"], index=0)
+            st.selectbox("Primary Learning Goal Level:", ["Beginner", "Intermediate", "Advanced"], index=0)
             
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # 4. Experience & Activity (Quick stats & links)
         st.markdown("""
-        <div class="linkedin-card">
-            <h3>🔗 Professional Links & Portfolio</h3>
+            <div class="linkedin-card">
+                <h3>🔗 Professional Links & Portfolio</h3>
         """, unsafe_allow_html=True)
         li_link = st.text_input("LinkedIn Profile URL:", value=st.session_state.linkedin_link)
         gh_link = st.text_input("GitHub Profile URL:", value=st.session_state.github_link)
@@ -287,27 +288,26 @@ elif page == "👤 My Profile":
             st.success("✅ Profile successfully updated and synced!")
             st.balloons()
         st.markdown("</div>", unsafe_allow_html=True)
-
+        
     with col_side:
-        # 5. Dashboard Stats Card
         st.markdown("""
-        <div class="linkedin-card">
-            <h3>📊 Analytics & Stats</h3>
+            <div class="linkedin-card">
+                <h3>📊 Analytics & Stats</h3>
         """, unsafe_allow_html=True)
         st.metric("Completed Sessions", f"{st.session_state.completed_sessions}", "100% Success")
         st.metric("Hours Earned", f"{st.session_state.user_credits} hrs", "+1 this week")
         st.metric("Community Rating", "4.9 / 5.0", "⭐ Top Rated")
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # 6. Credentials & Badges Card
         st.markdown("""
-        <div class="linkedin-card">
-            <h3>🏆 Honors & Badges</h3>
-            <p style="font-size: 0.9rem; margin-bottom: 8px;"><b>Reliable Partner ⭐</b><br><small style="color: #64748B;">Awarded for exceptional session attendance and mutual accountability.</small></p>
-            <p style="font-size: 0.9rem; margin-bottom: 8px;"><b>Streak Master 🔥</b><br><small style="color: #64748B;">Maintained 4 consecutive weeks of active skill exchange.</small></p>
-            <p style="font-size: 0.9rem; margin-bottom: 0px;"><b>Python Pro 🐍</b><br><small style="color: #64748B;">Completed advanced collaborative coding modules.</small></p>
-        </div>
+            <div class="linkedin-card">
+                <h3>🏆 Honors & Badges</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 8px;"><b>Reliable Partner ⭐</b><br><small style="color: #64748B;">Awarded for exceptional session attendance.</small></p>
+                <p style="font-size: 0.9rem; margin-bottom: 8px;"><b>Streak Master 🔥</b><br><small style="color: #64748B;">Maintained 4 consecutive weeks active.</small></p>
+                <p style="font-size: 0.9rem; margin-bottom: 0px;"><b>Python Pro 🐍</b><br><small style="color: #64748B;">Completed collaborative coding modules.</small></p>
+            </div>
         """, unsafe_allow_html=True)
+
 
 # --- PAGE 3: SMART MATCHING ENGINE ---
 elif page == "🔍 Smart Matching Engine":
@@ -320,26 +320,23 @@ elif page == "🔍 Smart Matching Engine":
             try:
                 response = supabase.table("Profiles").select("*").execute()
                 users = response.data
-                
                 if not users:
                     users = [
                         {"name": "Maria", "teach_skill": "Spanish", "learn_skill": "Python Programming", "badge": "Committed Beginner 📌", "credits": 3},
                         {"name": "Ahmed", "teach_skill": "Python Programming", "learn_skill": "Spanish", "badge": "Reliable Partner ⭐", "credits": 5},
                         {"name": "Amir", "teach_skill": "UI/UX Design (Canva)", "learn_skill": "Python Programming", "badge": "Creative Contributor 🎨", "credits": 4}
                     ]
-                
                 matches = [u for u in users if u.get("name", "").lower() != user_name.lower()]
-                
                 if matches:
                     st.success(f"Found {len(matches)} active peer(s) in the live community!")
                     for m in matches:
                         with st.container():
                             st.markdown(f"""
-                            ---
-                            - 👤 **Peer Name:** {m.get('name')}
-                            - 🎓 **Can Teach You:** `{m.get('teach_skill')}`
-                            - 📚 **Wants to Learn:** `{m.get('learn_skill')}`
-                            - 🏆 **Badge & Rating:** `{m.get('badge', 'Reliable Partner ⭐')}`
+                                ---
+                                - 👤 **Peer Name:** {m.get('name')}
+                                - 🎓 **Can Teach You:** `{m.get('teach_skill')}`
+                                - 📚 **Wants to Learn:** `{m.get('learn_skill')}`
+                                - 🏆 **Badge & Rating:** `{m.get('badge', 'Reliable Partner ⭐')}`
                             """)
                             if st.button(f"Connect & Propose Session with {m.get('name')}", key=f"req_{m.get('name')}"):
                                 st.balloons()
@@ -348,6 +345,7 @@ elif page == "🔍 Smart Matching Engine":
                     st.info("No peers found in the database yet. Save your profile to join the queue!")
             except Exception as e:
                 st.error(f"Could not fetch matches from database: {e}")
+
 
 # --- PAGE 4: HOUR BANK & CREDITS ---
 elif page == "💰 Hour Bank & Credits":
@@ -368,10 +366,11 @@ elif page == "💰 Hour Bank & Credits":
         if completed_with:
             st.session_state.user_credits += 1
             st.session_state.completed_sessions += 1
-            st.success(f"✅ Verified! 1 Hour credit successfully added to your account for the session with **{completed_with}**. New Balance: **{st.session_state.user_credits} Hours**.")
+            st.success(f"✅ Verified! 1 Hour credit successfully added to your account for the session with **{completed_with}**.")
             st.balloons()
         else:
             st.warning("Please enter your partner's name first.")
+
 
 # --- PAGE 5: PARTNER CHAT & DIRECT HUB ---
 elif page == "💬 Partner Chat & Direct Hub":
@@ -381,25 +380,23 @@ elif page == "💬 Partner Chat & Direct Hub":
     chat_partner = st.selectbox("Select Active Chat Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="chat_partner_select")
     
     st.markdown(f"""
-    <div style='background-color: #E2E8F0; border-left: 5px solid #0A66C2; padding: 14px; border-radius: 8px; margin-bottom: 15px;'>
-        <h4 style='color: #1B1F3B !important; margin-bottom: 5px;'>📅 Upcoming Session Schedule</h4>
-        <p style='color: #1B1F3B; margin: 2px 0;'><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
-        <p style='color: #1B1F3B; margin: 2px 0;'><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
-    </div>
+        <div style='background-color: #E2E8F0; border-left: 5px solid #0A66C2; padding: 14px; border-radius: 8px; margin-bottom: 15px;'>
+            <h4 style='color: #1B1F3B !important; margin-bottom: 5px;'>📅 Upcoming Session Schedule</h4>
+            <p style='color: #1B1F3B; margin: 2px 0;'><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
+            <p style='color: #1B1F3B; margin: 2px 0;'><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
+        </div>
     """, unsafe_allow_html=True)
     
     st.markdown(f"🟢 **Connection State:** Connected securely with **{chat_partner}** (Active P2P Encrypted Channel)")
     st.markdown("---")
     
     if chat_partner not in st.session_state.chat_messages:
-        st.session_state.chat_messages[chat_partner] = [
-            {"sender": chat_partner, "text": f"Hello {user_name}! Looking forward to our next skill exchange session."}
-        ]
+        st.session_state.chat_messages[chat_partner] = [{"sender": chat_partner, "text": f"Hello {user_name}! Looking forward to our session."}]
     if chat_partner not in st.session_state.shared_files:
         st.session_state.shared_files[chat_partner] = []
     if chat_partner not in st.session_state.visual_gallery:
         st.session_state.visual_gallery[chat_partner] = []
-
+        
     chat_col, vault_col = st.columns([2, 1])
     
     with chat_col:
@@ -417,12 +414,11 @@ elif page == "💬 Partner Chat & Direct Hub":
         with st.form(key="chat_form", clear_on_submit=True):
             new_message = st.text_input("Type your message here:", placeholder="Type a message to coordinate your session...")
             submit_chat = st.form_submit_button("Send Message 📤")
-            
             if submit_chat and new_message:
                 st.session_state.chat_messages[chat_partner].append({"sender": user_name, "text": new_message})
-                st.session_state.chat_messages[chat_partner].append({"sender": chat_partner, "text": f"Got it, {user_name}! Let's confirm."})
+                st.session_state.chat_messages[chat_partner].append({"sender": chat_partner, "text": f"Got it, {user_name}! Let's coordinate."})
                 st.rerun()
-
+                
     with vault_col:
         st.markdown("#### 📁 Document Vault & Files")
         uploaded_file = st.file_uploader("Upload study material", type=["pdf", "png", "jpg", "py", "txt"])
@@ -430,20 +426,20 @@ elif page == "💬 Partner Chat & Direct Hub":
             file_info = {"filename": uploaded_file.name, "uploader": user_name, "size": f"{uploaded_file.size // 1024} KB"}
             if file_info not in st.session_state.shared_files[chat_partner]:
                 st.session_state.shared_files[chat_partner].append(file_info)
-                st.success(f"Uploaded {uploaded_file.name} successfully!")
-        
+            st.success(f"Uploaded {uploaded_file.name} successfully!")
+            
         if st.session_state.shared_files[chat_partner]:
             for f in st.session_state.shared_files[chat_partner]:
                 st.markdown(f"""
-                <div style='background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
-                    📄 <b>{f.get('filename')}</b><br>
-                    <small style='color: #64748B;'>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
-                    📥 <a href='#' target='_blank' style='color: #0A66C2; text-decoration: none;'>Download Resource</a>
-                </div>
+                    <div style='background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
+                        📄 <b>{f.get('filename')}</b><br>
+                        <small style='color: #64748B;'>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
+                        📥 <a href='#' target='_blank' style='color: #0A66C2; text-decoration: none;'>Download Resource</a>
+                    </div>
                 """, unsafe_allow_html=True)
         else:
             st.info("No files shared yet.")
-
+            
         st.markdown("---")
         st.markdown("#### 🖼️ Session Visual Gallery")
         sketch_title = st.text_input("Visual Title / Sketch Name:", placeholder="e.g., Architecture Diagram")
@@ -451,15 +447,16 @@ elif page == "💬 Partner Chat & Direct Hub":
             if sketch_title:
                 st.session_state.visual_gallery[chat_partner].append({"title": sketch_title, "author": user_name, "type": "Design Canvas"})
                 st.success("Visual archived to gallery!")
-        
+                
         if st.session_state.visual_gallery[chat_partner]:
             for vis in st.session_state.visual_gallery[chat_partner]:
                 st.markdown(f"""
-                <div style='background-color: #FFFFFF; border: 1px solid #CBD5E1; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
-                    🎨 <b>{vis.get('title')}</b><br>
-                    <small style='color: #64748B;'>Archived by: {vis.get('author')}</small>
-                </div>
+                    <div style='background-color: #FFFFFF; border: 1px solid #CBD5E1; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
+                        🎨 <b>{vis.get('title')}</b><br>
+                        <small style='color: #64748B;'>Archived by: {vis.get('author')}</small>
+                    </div>
                 """, unsafe_allow_html=True)
+
 
 # --- PAGE 6: AI EXCUSE & PARTNER AUDIT ---
 elif page == "🛡️ AI Excuse & Partner Audit":
@@ -470,23 +467,17 @@ elif page == "🛡️ AI Excuse & Partner Audit":
     remaining = max(0, 2 - current_used)
     st.info(f"📅 **User Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
     
-    st.markdown("### 🎬 Demo Simulation Mode")
-    sim_mode = st.radio(
-        "Switch View Mode for Demo Recording:",
-        ["1. User View: Submit Excuse & Request Rescheduling", "2. Partner View: Review & Write Custom Note"],
-        horizontal=True
-    )
+    sim_mode = st.radio("Switch View Mode for Demo Recording:", ["1. User View: Submit Excuse & Request Rescheduling", "2. Partner View: Review & Write Custom Note"], horizontal=True)
     
     col_a, col_b = st.columns(2)
     with col_a:
         assigned_partner = st.selectbox("Select Your Learning Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="audit_partner_select")
     with col_b:
         excuse_type_label = st.selectbox("Excuse Category:", ["Internet Outage / Technical", "Health Emergency / Sick", "University Exam / Academic", "Family Emergency"])
-    
+        
     if sim_mode.startswith("1"):
         st.markdown("#### 📤 Step 1: Submit Excuse (As User)")
         excuse_text = st.text_area("Describe reason for rescheduling:", placeholder="e.g., Sudden power outage and internet disconnection...")
-        
         if st.button("Submit for Partner & AI Audit"):
             if excuse_text:
                 st.session_state.pending_excuse = {
@@ -495,13 +486,11 @@ elif page == "🛡️ AI Excuse & Partner Audit":
                     "excuse_type": excuse_type_label,
                     "text": excuse_text
                 }
-                st.success(f"⏳ **Status: Pending Partner Verification.** Excuse sent to **{assigned_partner}** successfully! Switch to *Partner View* above to review and sign off.")
+                st.success(f"⏳ **Status: Pending Partner Verification.** Excuse sent to **{assigned_partner}** successfully!")
             else:
                 st.warning("Please describe your reason first.")
-                
     else:
         st.markdown("#### 📥 Step 2: Partner Review & Sign-off (As Partner)")
-        
         p_approvals_used = st.session_state.partner_approval_count
         st.info(f"🛡️ **Partner Governance Quota:** Partner Approvals Used: **{p_approvals_used} of 5** allowed this month.")
         
@@ -511,15 +500,7 @@ elif page == "🛡️ AI Excuse & Partner Audit":
         p_category = current_pending.get("excuse_type", excuse_type_label)
         
         st.write(f"👤 **Reviewing excuse from {p_user}:** '{p_text}' (Category: *{p_category}*)")
-        
-        st.markdown(
-            "> ⚖️ **PeerHub Rights Protection Disclaimer:** PeerHub protects your learning rights, giving you the power to carefully review, comment, and explicitly accept or reject your partner's excuse."
-        )
-        
-        partner_feedback_note = st.text_input(
-            "Partner's Written Review Note / Reason:", 
-            placeholder="e.g., Partner's Review Note: I confirm we agreed on rescheduling this session..."
-        )
+        partner_feedback_note = st.text_input("Partner's Written Review Note / Reason:", placeholder="e.g., Partner's Review Note: I confirm we agreed on rescheduling...")
         
         col_p1, col_p2 = st.columns(2)
         with col_p1:
@@ -527,51 +508,36 @@ elif page == "🛡️ AI Excuse & Partner Audit":
                 if not partner_feedback_note:
                     st.warning("Please write a custom approval note before submitting.")
                 else:
-                    if st.session_state.partner_approval_count >= 5:
-                        st.error("🚨 **Partner Monthly Approval Limit Reached (5/5).**")
-                        st.warning("To protect learning commitments, extra reschedules require direct platform mediation or standard penalty rules.")
-                    else:
-                        reason_lower = p_text.lower()
-                        weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
-                        is_weak = any(w in reason_lower for w in weak_triggers)
-                        
-                        if st.session_state.excuse_count >= 2:
-                            st.error("🚨 **User Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
-                            st.session_state.audit_log.insert(0, {
-                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                                "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded",
-                                "partner_note": partner_feedback_note
-                            })
-                        elif is_weak:
-                            st.warning("⚠️ **AI Audit Flagged:** Approved by partner, but flagged by AI as weak reason.")
-                        else:
-                            st.session_state.excuse_count += 1
-                            st.session_state.partner_approval_count += 1
-                            st.success("✅ **Verified Rescheduling Demand Approved!** Both users are bound to the makeup session time. Zero credit penalty.")
-                            st.session_state.audit_log.insert(0, {
-                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                                "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Verified Rescheduling Demand",
-                                "partner_note": partner_feedback_note
-                            })
-                            st.balloons()
-                    
+                    st.session_state.excuse_count += 1
+                    st.session_state.partner_approval_count += 1
+                    st.success("✅ **Verified Rescheduling Demand Approved!**")
+                    st.session_state.audit_log.insert(0, {
+                        "user": p_user,
+                        "partner": assigned_partner,
+                        "excuse_type": p_category,
+                        "monthly_count": f"{st.session_state.excuse_count}/2",
+                        "status": "Verified Rescheduling Demand",
+                        "partner_note": partner_feedback_note
+                    })
+                    st.balloons()
         with col_p2:
             if st.button("❌ Reject & Flag"):
                 if not partner_feedback_note:
                     st.warning("Please write a custom rejection note explaining why.")
                 else:
-                    st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
+                    st.error("❌ **Rescheduling Request Rejected by Partner.**")
                     st.session_state.audit_log.insert(0, {
-                        "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                        "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner",
+                        "user": p_user,
+                        "partner": assigned_partner,
+                        "excuse_type": p_category,
+                        "monthly_count": f"{st.session_state.excuse_count}/2",
+                        "status": "Rejected by Partner",
                         "partner_note": partner_feedback_note
                     })
-
+                    
     st.markdown("---")
     st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
-    st.write("Recent peer session accountability audits visible to judges in real-time:")
-    
     st.table(st.session_state.audit_log)
-
+    
 st.markdown("---")
 st.markdown("<p style='text-align: center; color: #64748B;'>PeerHub Full-Stack App — Powered by Supabase & Streamlit (Thirduni - October 2026)</p>", unsafe_allow_html=True)
