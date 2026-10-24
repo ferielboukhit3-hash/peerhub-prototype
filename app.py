@@ -24,13 +24,13 @@ except Exception as e:
 
 # --- SESSION STATE INITIALIZATION ---
 if "excuse_count" not in st.session_state:
-    st.session_state.excuse_count = 1  # User used 1 out of 2 allowed per month
+    st.session_state.excuse_count = 1
 
 if "partner_approval_count" not in st.session_state:
-    st.session_state.partner_approval_count = 3  # Partner used 3 out of 5 allowed per month
+    st.session_state.partner_approval_count = 3
 
 if "user_credits" not in st.session_state:
-    st.session_state.user_credits = 5  # Earned learning hours / credits available
+    st.session_state.user_credits = 5
 
 if "completed_sessions" not in st.session_state:
     st.session_state.completed_sessions = 4
@@ -71,7 +71,7 @@ if "pending_excuse" not in st.session_state:
         "text": "Sudden internet outage and power cut before session."
     }
 
-# --- MINIMALIST & REFINED CSS STYLING ---
+# --- MINIMALIST & CLEAN CSS STYLING ---
 st.markdown("""
     <style>
     .main {
@@ -99,21 +99,13 @@ st.markdown("""
         background-color: #1B1F3B;
         color: white;
     }
-    .badge-tag {
-        background-color: #CE00DB;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-    }
-    div.stMarkdownContainer, div.stTabs, div.stTextInput, div.stSelectbox {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
     </style>
 """, unsafe_allow_html=True)
 
-# --- SIDEBAR & USER PROFILE SETUP ---
-st.sidebar.markdown("## 📝 User Profile Setup")
+# --- SIDEBAR: APP LOGO & PROFILE CONFIGURATION ---
+st.sidebar.markdown("# 🤝 PeerHub")
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 👤 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
 teach_skill = st.sidebar.selectbox("What skill can you teach?", ["Python Programming", "Spanish", "UI/UX Design (Canva)", "French"])
 learn_skill = st.sidebar.selectbox("What skill do you want to learn?", ["Spanish", "Python Programming", "English", "Data Science"])
@@ -130,20 +122,45 @@ if st.sidebar.button("Save Profile to Cloud"):
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
 
-# --- MAIN APP HEADER ---
-st.title("🚀 PeerHub")
-st.subheader("Interactive Skill Exchange & Live Peer-to-Peer Learning Ecosystem")
+# --- NEW STRUCTURED NAVIGATION (SIDEBAR RADIO FOR PAGE SWITCHING) ---
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🧭 Platform Navigation")
+page = st.sidebar.radio(
+    "Go to page:",
+    [
+        "🏠 Home & Overview", 
+        "🔍 Smart Matching Engine", 
+        "💰 Hour Bank & Credits", 
+        "💬 Partner Chat & Direct Hub", 
+        "🛡️ AI Excuse & Partner Audit"
+    ]
+)
 
-st.markdown("---")
+# --- PAGE 1: HOME & OVERVIEW ---
+if page == "🏠 Home & Overview":
+    st.markdown("<h1 style='text-align: center; color: #1B1F3B;'>Welcome to PeerHub 🚀</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #3F72AF;'>Interactive Skill Exchange & Live Peer-to-Peer Learning Ecosystem</h3>", unsafe_allow_html=True)
+    st.markdown("---")
+    
+    col_h1, col_h2, col_h3 = st.columns(3)
+    with col_h1:
+        st.markdown("### 🔍 Skill Barter")
+        st.write("Match directly with peers based on what you can teach and what you want to learn using our live Supabase database.")
+    with col_h2:
+        st.markdown("### 💬 Direct P2P Hub")
+        st.write("Communicate in real-time, upload study materials to the Document Vault, and archive visual sketches.")
+    with col_h3:
+        st.markdown("### 🛡️ Fair Governance")
+        st.write("AI-powered excuse validation combined with partner sign-off quotas to protect community reliability.")
+    
+    st.markdown("---")
+    st.info(f"👋 Hello **{user_name}**! Use the sidebar navigation above to explore the platform pages. **{db_status}**")
 
-# Navigation Tabs
-tab1, tab2, tab3, tab4 = st.tabs(["🔍 Matching Engine", "💰 Hour Bank & Credits", "💬 Partner Chat & Messages", "🛡️ AI Excuse & Partner Audit"])
-
-# --- TAB 1: SMART SKILL BARTER MATCHING ENGINE ---
-with tab1:
-    st.header("Smart Skill Barter Matching Dashboard")
+# --- PAGE 2: SMART MATCHING ENGINE ---
+elif page == "🔍 Smart Matching Engine":
+    st.header("🔍 Smart Skill Barter Matching Dashboard")
     st.write(f"Welcome back, **{user_name}**! {db_status}")
-    st.write("Browse dynamic active community learners matching your teach & learn preferences:")
+    st.write("Browse active community learners matching your teach & learn preferences:")
     
     if st.button("🔍 Find Perfect Match from Database"):
         with st.spinner("Searching live database for potential partners..."):
@@ -158,10 +175,7 @@ with tab1:
                         {"name": "Amir", "teach_skill": "UI/UX Design (Canva)", "learn_skill": "Python Programming", "badge": "Creative Contributor 🎨", "credits": 4}
                     ]
                 
-                matches = [
-                    u for u in users 
-                    if u.get("name", "").lower() != user_name.lower()
-                ]
+                matches = [u for u in users if u.get("name", "").lower() != user_name.lower()]
                 
                 if matches:
                     st.success(f"Found {len(matches)} active peer(s) in the live community!")
@@ -174,17 +188,17 @@ with tab1:
                             - 📚 **Wants to Learn:** `{m.get('learn_skill')}`
                             - 🏆 **Badge & Rating:** `{m.get('badge', 'Reliable Partner ⭐')}`
                             """)
-                            if st.button(f"Connect & Propose Session with {m.get('name')}", key=f"req_{m.get('name')}_{m.get('teach_skill', '')}"):
+                            if st.button(f"Connect & Propose Session with {m.get('name')}", key=f"req_{m.get('name')}"):
                                 st.balloons()
-                                st.info(f"🤝 Session proposal successfully sent to **{m.get('name')}**! Get ready to exchange skills.")
+                                st.info(f"🤝 Session proposal successfully sent to **{m.get('name')}**!")
                 else:
                     st.info("No peers found in the database yet. Save your profile to join the queue!")
             except Exception as e:
                 st.error(f"Could not fetch matches from database: {e}")
 
-# --- TAB 2: HOUR BANK & CREDITS SYSTEM ---
-with tab2:
-    st.header("Hour Bank & Skill Credits")
+# --- PAGE 3: HOUR BANK & CREDITS ---
+elif page == "💰 Hour Bank & Credits":
+    st.header("💰 Hour Bank & Skill Credits")
     st.write(f"Track your earned hours and exchange value transparently within PeerHub, **{user_name}**.")
     
     col1, col2, col3 = st.columns(3)
@@ -206,8 +220,8 @@ with tab2:
         else:
             st.warning("Please enter your partner's name first.")
 
-# --- TAB 3: PARTNER CHAT & DIRECT MESSAGING HUB (WITH VAULT & GALLERY) ---
-with tab3:
+# --- PAGE 4: PARTNER CHAT & DIRECT HUB ---
+elif page == "💬 Partner Chat & Direct Hub":
     st.header("💬 Partner Chat & Direct Messaging Hub")
     st.write("Communicate directly with your assigned learning partners, share resources, and track session schedules.")
     
@@ -294,8 +308,8 @@ with tab3:
                 </div>
                 """, unsafe_allow_html=True)
 
-# --- TAB 4: AI EXCUSE & PARTNER AUDIT SYSTEM ---
-with tab4:
+# --- PAGE 5: AI EXCUSE & PARTNER AUDIT ---
+elif page == "🛡️ AI Excuse & Partner Audit":
     st.header("🛡️ Partner Verification & AI Excuse Audit System")
     st.write("Need to reschedule a session? Submit your excuse for dual-layer verification: **Partner Sign-off** & **AI Policy Check**.")
     
@@ -389,22 +403,4 @@ with tab4:
                             st.balloons()
                     
         with col_p2:
-            if st.button("❌ Reject & Flag"):
-                if not partner_feedback_note:
-                    st.warning("Please write a custom rejection note explaining why.")
-                else:
-                    st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
-                    st.session_state.audit_log.insert(0, {
-                        "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
-                        "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner",
-                        "partner_note": partner_feedback_note
-                    })
-
-    st.markdown("---")
-    st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
-    st.write("Recent peer session accountability audits visible to judges in real-time:")
-    
-    st.table(st.session_state.audit_log)
-
-st.markdown("---")
-st.markdown("<p style='text-align: center; color: #64748B;'>PeerHub Full-Stack App — Powered by Supabase & Streamlit (Thirduni - October 2026)</p>", unsafe_allow_html=True)
+            if st.button
