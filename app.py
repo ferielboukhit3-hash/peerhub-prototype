@@ -71,30 +71,40 @@ if "pending_excuse" not in st.session_state:
         "text": "Sudden internet outage and power cut before session."
     }
 
-# --- MINIMALIST CSS STYLING ---
+# --- MINIMALIST & REFINED CSS STYLING ---
 st.markdown("""
     <style>
     .main {
-        background-color: #F9F7F7;
+        background-color: #F3F3F4;
     }
     h1, h2, h3, h4 {
         color: #1B1F3B !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-weight: 600;
     }
     p, label, span {
         color: #1B1F3B;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .stButton>button {
         background-color: #3F72AF;
         color: white;
         border-radius: 6px;
-        padding: 0.4rem 1rem;
+        padding: 0.45rem 1.2rem;
         font-weight: 500;
         border: none;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .stButton>button:hover {
-        background-color: #112D4E;
+        background-color: #1B1F3B;
         color: white;
+    }
+    .badge-tag {
+        background-color: #CE00DB;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
     }
     div.stMarkdownContainer, div.stTabs, div.stTextInput, div.stSelectbox {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -204,10 +214,10 @@ with tab3:
     chat_partner = st.selectbox("Select Active Chat Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="chat_partner_select")
     
     st.markdown(f"""
-    <div style='background-color: #DBE2EF; border-left: 5px solid #3F72AF; padding: 12px; border-radius: 8px; margin-bottom: 15px;'>
-        <h4 style='color: #112D4E !important;'>📅 Upcoming Session Schedule</h4>
-        <p style='color: #112D4E;'><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
-        <p style='color: #112D4E;'><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
+    <div style='background-color: #E2E8F0; border-left: 5px solid #3F72AF; padding: 14px; border-radius: 8px; margin-bottom: 15px;'>
+        <h4 style='color: #1B1F3B !important; margin-bottom: 5px;'>📅 Upcoming Session Schedule</h4>
+        <p style='color: #1B1F3B; margin: 2px 0;'><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
+        <p style='color: #1B1F3B; margin: 2px 0;'><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -233,9 +243,9 @@ with tab3:
                 sender = msg.get("sender")
                 text = msg.get("text")
                 if sender == user_name:
-                    st.markdown(f"<div style='text-align: right; background-color: #DBE2EF; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>You:</b> {text}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: right; background-color: #DBE2EF; padding: 10px; border-radius: 8px; margin: 6px 0;'><b>You:</b> {text}</div>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<div style='text-align: left; background-color: #F9F7F7; border: 1px solid #DBE2EF; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>{sender}:</b> {text}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: left; background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 8px; margin: 6px 0;'><b>{sender}:</b> {text}</div>", unsafe_allow_html=True)
                     
         with st.form(key="chat_form", clear_on_submit=True):
             new_message = st.text_input("Type your message here:", placeholder="Type a message to coordinate your session...")
@@ -258,10 +268,10 @@ with tab3:
         if st.session_state.shared_files[chat_partner]:
             for f in st.session_state.shared_files[chat_partner]:
                 st.markdown(f"""
-                <div style='background-color: #F9F7F7; border: 1px solid #DBE2EF; padding: 8px; border-radius: 6px; margin-bottom: 8px;'>
+                <div style='background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
                     📄 <b>{f.get('filename')}</b><br>
-                    <small>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
-                    📥 <a href='#' target='_blank'>Download Resource</a>
+                    <small style='color: #64748B;'>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
+                    📥 <a href='#' target='_blank' style='color: #3F72AF; text-decoration: none;'>Download Resource</a>
                 </div>
                 """, unsafe_allow_html=True)
         else:
@@ -278,9 +288,9 @@ with tab3:
         if st.session_state.visual_gallery[chat_partner]:
             for vis in st.session_state.visual_gallery[chat_partner]:
                 st.markdown(f"""
-                <div style='background-color: #DBE2EF; border: 1px solid #3F72AF; padding: 8px; border-radius: 6px; margin-bottom: 6px;'>
+                <div style='background-color: #FFFFFF; border: 1px solid #CBD5E1; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
                     🎨 <b>{vis.get('title')}</b><br>
-                    <small>Archived by: {vis.get('author')}</small>
+                    <small style='color: #64748B;'>Archived by: {vis.get('author')}</small>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -397,4 +407,4 @@ with tab4:
     st.table(st.session_state.audit_log)
 
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>PeerHub Full-Stack App — Powered by Supabase & Streamlit (Thirduni - October 2026)</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #64748B;'>PeerHub Full-Stack App — Powered by Supabase & Streamlit (Thirduni - October 2026)</p>", unsafe_allow_html=True)
