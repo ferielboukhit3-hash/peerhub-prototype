@@ -36,10 +36,10 @@ if "completed_sessions" not in st.session_state:
     st.session_state.completed_sessions = 4
 
 if "user_bio" not in st.session_state:
-    st.session_state.user_bio = "Third-year university student studying Commercial Sciences & International Trade. Passionate about Python, languages, and digital marketing."
+    st.session_state.user_bio = "Third-year university student studying Commercial Sciences & International Trade at University of Algiers 3. Passionate about Python, languages, digital marketing, and international economic diplomacy."
 
-if "user_level" not in st.session_state:
-    st.session_state.user_level = "Intermediate"
+if "user_headline" not in st.session_state:
+    st.session_state.user_headline = "International Trade Student & Aspiring Full-Stack Developer | PeerHub Community Member"
 
 if "linkedin_link" not in st.session_state:
     st.session_state.linkedin_link = "linkedin.com/in/feriel-boukhit"
@@ -83,7 +83,7 @@ if "pending_excuse" not in st.session_state:
         "text": "Sudden internet outage and power cut before session."
     }
 
-# --- MINIMALIST & REFINED CSS STYLING ---
+# --- MINIMALIST & LINKEDIN-INSPIRED CSS STYLING ---
 st.markdown("""
     <style>
     .main {
@@ -99,7 +99,7 @@ st.markdown("""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .stButton>button {
-        background-color: #0028BB;
+        background-color: #0A66C2;
         color: white;
         border-radius: 6px;
         padding: 0.45rem 1.2rem;
@@ -108,15 +108,33 @@ st.markdown("""
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .stButton>button:hover {
-        background-color: #1B1F3B;
+        background-color: #004182;
         color: white;
     }
-    .profile-banner {
-        background: linear-gradient(135deg, #1B1F3B 0%, #3F72AF 100%);
-        height: 140px;
+    .linkedin-card {
+        background-color: white;
+        padding: 24px;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    .linkedin-banner {
+        background: linear-gradient(135deg, #0A66C2 0%, #1B1F3B 100%);
+        height: 160px;
         border-radius: 10px 10px 0 0;
         padding: 20px;
         color: white;
+    }
+    .skill-pill {
+        background-color: #E2E8F0;
+        color: #1B1F3B;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin: 3px;
+        font-weight: 500;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -188,60 +206,108 @@ if page == "🏠 Home & Overview":
     st.markdown("---")
     st.info(f"👋 Hello **{user_name}**! Use the sidebar navigation or click **Open My Profile Page** above to view your profile. **{db_status}**")
 
-# --- PAGE 2: USER PROFILE PAGE ---
+# --- PAGE 2: LINKEDIN-INSPIRED USER PROFILE PAGE ---
 elif page == "👤 My Profile":
+    # 1. LinkedIn Cover Banner & Header Card
     st.markdown("""
-        <div class="profile-banner">
-            <h2>👤 User Profile & Learning Portfolio</h2>
-            <p>Manage your professional background, skill levels, earned badges, and community reputation.</p>
+        <div class="linkedin-banner">
+            <h2>💼 Professional Learning Portfolio</h2>
+            <p>Structured & structured like a professional LinkedIn networking profile.</p>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    prof_col1, prof_col2 = st.columns([1, 2])
+    # Main Profile Top Card (LinkedIn Style)
+    st.markdown(f"""
+    <div class="linkedin-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h1 style="margin: 0; color: #1B1F3B;">👩‍💻 {user_name}</h1>
+                <p style="font-size: 1.05rem; color: #475569; margin: 4px 0;">{st.session_state.user_headline}</p>
+                <p style="color: #64748B; font-size: 0.9rem; margin: 2px 0;">📍 Algiers, Algeria · <span style="color: #0A66C2; font-weight: 600;">500+ Peer Connections</span></p>
+            </div>
+            <div style="text-align: right;">
+                <span style="background-color: #0A66C2; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">Verified Member 🟢</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    with prof_col1:
-        st.markdown(f"""
-        <div style='background-color: white; padding: 20px; border-radius: 10px; border: 1px solid #E2E8F0; text-align: center;'>
-            <h3>👩‍💻 {user_name}</h3>
-            <p style='color: #64748B;'>University Student & International Trade</p>
-            <hr>
-            <h4>🏆 Earned Badges</h4>
-            <span style='background-color: #0028BB; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;'>Reliable Partner ⭐</span><br><br>
-            <span style='background-color: #9300ED; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;'>Streak Master 🔥</span><br><br>
-            <span style='background-color: #3F72AF; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem;'>Python Pro 🐍</span>
+    # Two-Column Layout (LinkedIn feed style)
+    col_main, col_side = st.columns([2, 1])
+    
+    with col_main:
+        # 2. About Section (Bio)
+        st.markdown("""
+        <div class="linkedin-card">
+            <h3>📝 About</h3>
+        """, unsafe_allow_html=True)
+        updated_bio = st.text_area("Edit your professional summary:", value=st.session_state.user_bio, height=120)
+        st.session_state.user_bio = updated_bio
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # 3. Skills & Endorsements Section
+        st.markdown("""
+        <div class="linkedin-card">
+            <h3>💡 Skills & Expertise</h3>
+            <p style="color: #64748B; font-size: 0.9rem;">Verified by peer exchanges and academic coursework.</p>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div>
+            <span class="skill-pill">Python Programming (Intermediate)</span>
+            <span class="skill-pill">International Trade & Macroeconomics</span>
+            <span class="skill-pill">Digital Marketing & E-Commerce</span>
+            <span class="skill-pill">UI/UX Design (Canva)</span>
+            <span class="skill-pill">French & English Fluency</span>
+            <span class="skill-pill">Spanish (B1)</span>
         </div>
         """, unsafe_allow_html=True)
         
-    with prof_col2:
-        st.markdown("### 📊 Quick Performance Stats")
-        q1, q2, q3 = st.columns(3)
-        q1.metric("Completed Sessions", f"{st.session_state.completed_sessions}", "100%")
-        q2.metric("Hours Earned", f"{st.session_state.user_credits} hrs", "+1 this week")
-        q3.metric("Peer Rating", "4.9 / 5.0", "⭐ Top Rated")
-        
-        st.markdown("---")
-        st.markdown("### 📝 Bio & Professional Background")
-        updated_bio = st.text_area("About Me:", value=st.session_state.user_bio, height=100)
-        st.session_state.user_bio = updated_bio
-        
-        st.markdown("### 🎓 Expertise & Proficiency Levels")
-        col_ex1, col_ex2 = st.columns(2)
-        with col_ex1:
-            st.selectbox("Teaching Skill Level:", ["Beginner", "Intermediate", "Advanced", "Expert"], index=2)
-        with col_ex2:
-            st.selectbox("Learning Skill Level:", ["Beginner", "Intermediate", "Advanced"], index=1)
+        col_sk1, col_sk2 = st.columns(2)
+        with col_sk1:
+            st.selectbox("Primary Teaching Skill:", ["Python Programming", "Spanish", "UI/UX Design (Canva)", "French"], index=0)
+        with col_sk2:
+            st.selectbox("Primary Learning Goal:", ["Spanish", "Python Programming", "English", "Data Science"], index=0)
             
-        st.markdown("### 🔗 Professional & Social Links")
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # 4. Experience & Activity (Quick stats & links)
+        st.markdown("""
+        <div class="linkedin-card">
+            <h3>🔗 Professional Links & Portfolio</h3>
+        """, unsafe_allow_html=True)
         li_link = st.text_input("LinkedIn Profile URL:", value=st.session_state.linkedin_link)
         gh_link = st.text_input("GitHub Profile URL:", value=st.session_state.github_link)
         st.session_state.linkedin_link = li_link
         st.session_state.github_link = gh_link
         
-        if st.button("💾 Save Profile Changes"):
-            st.success("✅ Profile changes successfully saved and synced with cloud session state!")
+        if st.button("💾 Save Profile Updates"):
+            st.success("✅ Profile successfully updated and synced!")
             st.balloons()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col_side:
+        # 5. Dashboard Stats Card
+        st.markdown("""
+        <div class="linkedin-card">
+            <h3>📊 Analytics & Stats</h3>
+        """, unsafe_allow_html=True)
+        st.metric("Completed Sessions", f"{st.session_state.completed_sessions}", "100% Success")
+        st.metric("Hours Earned", f"{st.session_state.user_credits} hrs", "+1 this week")
+        st.metric("Community Rating", "4.9 / 5.0", "⭐ Top Rated")
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # 6. Credentials & Badges Card
+        st.markdown("""
+        <div class="linkedin-card">
+            <h3>🏆 Honors & Badges</h3>
+            <p style="font-size: 0.9rem; margin-bottom: 8px;"><b>Reliable Partner ⭐</b><br><small style="color: #64748B;">Awarded for exceptional session attendance and mutual accountability.</small></p>
+            <p style="font-size: 0.9rem; margin-bottom: 8px;"><b>Streak Master 🔥</b><br><small style="color: #64748B;">Maintained 4 consecutive weeks of active skill exchange.</small></p>
+            <p style="font-size: 0.9rem; margin-bottom: 0px;"><b>Python Pro 🐍</b><br><small style="color: #64748B;">Completed advanced collaborative coding modules.</small></p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # --- PAGE 3: SMART MATCHING ENGINE ---
 elif page == "🔍 Smart Matching Engine":
@@ -315,7 +381,7 @@ elif page == "💬 Partner Chat & Direct Hub":
     chat_partner = st.selectbox("Select Active Chat Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="chat_partner_select")
     
     st.markdown(f"""
-    <div style='background-color: #E2E8F0; border-left: 5px solid #0028BB; padding: 14px; border-radius: 8px; margin-bottom: 15px;'>
+    <div style='background-color: #E2E8F0; border-left: 5px solid #0A66C2; padding: 14px; border-radius: 8px; margin-bottom: 15px;'>
         <h4 style='color: #1B1F3B !important; margin-bottom: 5px;'>📅 Upcoming Session Schedule</h4>
         <p style='color: #1B1F3B; margin: 2px 0;'><b>Partner:</b> {chat_partner} | <b>Agreed Time:</b> Tomorrow, 16:00 Algiers Time</p>
         <p style='color: #1B1F3B; margin: 2px 0;'><b>Topic:</b> Python Functions & Spanish Intermediate Conversation</p>
@@ -372,7 +438,7 @@ elif page == "💬 Partner Chat & Direct Hub":
                 <div style='background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
                     📄 <b>{f.get('filename')}</b><br>
                     <small style='color: #64748B;'>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
-                    📥 <a href='#' target='_blank' style='color: #0028BB; text-decoration: none;'>Download Resource</a>
+                    📥 <a href='#' target='_blank' style='color: #0A66C2; text-decoration: none;'>Download Resource</a>
                 </div>
                 """, unsafe_allow_html=True)
         else:
