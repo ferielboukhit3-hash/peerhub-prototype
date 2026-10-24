@@ -24,12 +24,13 @@ except Exception as e:
 
 # --- SESSION STATE INITIALIZATION ---
 if "excuse_count" not in st.session_state:
-    st.session_state.excuse_count = 0  # 0 used out of 2 allowed per month
+    st.session_state.excuse_count = 2  # Set to 2 for testing limits based on current view
 
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = [
-        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "2/2", "status": "Approved by Partner & AI"},
-        {"user": "Ahmed", "partner": "Amir", "excuse_type": "Exam Conflict", "monthly_count": "1/2", "status": "Approved by Partner & AI"}
+        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage / Technical", "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded", "partner_note": "Partner's Review Note: Limit exceeded for this month."},
+        {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "2/2", "status": "Approved by Partner & AI", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."},
+        {"user": "Ahmed", "partner": "Amir", "excuse_type": "Exam Conflict", "monthly_count": "1/2", "status": "Approved by Partner & AI", "partner_note": "Partner's Review Note: Verified university exam schedule."}
     ]
 
 # --- SIDEBAR & USER PROFILE SETUP ---
@@ -164,43 +165,63 @@ with tab3:
     elif verification_step == "2. Partner Review & Sign-off":
         st.info(f"👤 Logged in as Partner (**{assigned_partner}** reviewing request from **{user_name}**):")
         
+        # Rights Protection Disclaimer
+        st.markdown(
+            "> ⚖️ **PeerHub Rights Protection Disclaimer:** PeerHub protects your learning rights, giving you the power to carefully review, comment, and explicitly accept or reject your partner's excuse."
+        )
+        
+        # Custom Written Partner Feedback/Approval Note Input
+        partner_feedback_note = st.text_input(
+            "Partner's Written Review Note / Reason:", 
+            placeholder="e.g., Partner's Review Note: I confirm we agreed on rescheduling this session..."
+        )
+        
         col_p1, col_p2 = st.columns(2)
         with col_p1:
             if st.button("✅ Approve Partner Rescheduling"):
-                reason_lower = excuse_text.lower() if 'excuse_text' in locals() else ""
-                weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
-                is_weak = any(w in reason_lower for w in weak_triggers)
-                
-                if st.session_state.excuse_count >= 2:
-                    st.error("🚨 **Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
-                    st.session_state.audit_log.insert(0, {
-                        "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
-                        "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded"
-                    })
-                elif is_weak:
-                    st.warning("⚠️ **AI Audit Flagged:** Approved by partner, but flagged by AI as weak reason.")
+                if not partner_feedback_note:
+                    st.warning("Please write a custom approval note before submitting.")
                 else:
-                    st.session_state.excuse_count += 1
-                    st.success("✅ **Approved by Partner & AI Policy Check!** Zero credit penalty. Badge protected.")
-                    st.session_state.audit_log.insert(0, {
-                        "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
-                        "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Approved by Partner & AI"
-                    })
-                    st.balloons()
+                    reason_lower = excuse_text.lower() if 'excuse_text' in locals() else ""
+                    weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
+                    is_weak = any(w in reason_lower for w in weak_triggers)
+                    
+                    if st.session_state.excuse_count >= 2:
+                        st.error("🚨 **Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
+                        st.session_state.audit_log.insert(0, {
+                            "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
+                            "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded",
+                            "partner_note": partner_feedback_note
+                        })
+                    elif is_weak:
+                        st.warning("⚠️ **AI Audit Flagged:** Approved by partner, but flagged by AI as weak reason.")
+                    else:
+                        st.session_state.excuse_count += 1
+                        st.success("✅ **Approved by Partner & AI Policy Check!** Zero credit penalty. Badge protected.")
+                        st.session_state.audit_log.insert(0, {
+                            "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
+                            "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Approved by Partner & AI",
+                            "partner_note": partner_feedback_note
+                        })
+                        st.balloons()
                     
         with col_p2:
             if st.button("❌ Reject & Flag"):
-                st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
-                st.session_state.audit_log.insert(0, {
-                    "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
-                    "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner"
-                })
+                if not partner_feedback_note:
+                    st.warning("Please write a custom rejection note explaining why.")
+                else:
+                    st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
+                    st.session_state.audit_log.insert(0, {
+                        "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
+                        "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner",
+                        "partner_note": partner_feedback_note
+                    })
 
     st.markdown("---")
     st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
     st.write("Recent peer session accountability audits visible to judges in real-time:")
     
-    # Display Audit Log Table
+    # Display Audit Log Table including Partner's Written Note
     st.table(st.session_state.audit_log)
 
 st.markdown("---")
