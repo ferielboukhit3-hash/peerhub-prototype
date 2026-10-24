@@ -125,7 +125,6 @@ st.markdown("""
 st.sidebar.markdown("# 🤝 PeerHub")
 st.sidebar.markdown("---")
 
-# Quick Profile Shortcut Button in Sidebar
 if st.sidebar.button("👤 Open My Profile Page"):
     st.session_state.nav_page = "👤 My Profile"
 
@@ -149,7 +148,6 @@ page = st.sidebar.radio(
     index=default_page_index
 )
 
-# Keep session state in sync
 st.session_state.nav_page = page
 
 st.sidebar.markdown("---")
@@ -190,9 +188,8 @@ if page == "🏠 Home & Overview":
     st.markdown("---")
     st.info(f"👋 Hello **{user_name}**! Use the sidebar navigation or click **Open My Profile Page** above to view your profile. **{db_status}**")
 
-# --- PAGE 2: USER PROFILE PAGE (NEW HIGH-END DESIGN) ---
+# --- PAGE 2: USER PROFILE PAGE ---
 elif page == "👤 My Profile":
-    # Custom Cover Banner
     st.markdown("""
         <div class="profile-banner">
             <h2>👤 User Profile & Learning Portfolio</h2>
@@ -202,7 +199,6 @@ elif page == "👤 My Profile":
     
     st.markdown("---")
     
-    # Layout: Avatar & Quick Stats on Left, Editable Info on Right
     prof_col1, prof_col2 = st.columns([1, 2])
     
     with prof_col1:
@@ -375,3 +371,141 @@ elif page == "💬 Partner Chat & Direct Hub":
                 st.markdown(f"""
                 <div style='background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
                     📄 <b>{f.get('filename')}</b><br>
+                    <small style='color: #64748B;'>Uploader: {f.get('uploader')} ({f.get('size')})</small><br>
+                    📥 <a href='#' target='_blank' style='color: #0028BB; text-decoration: none;'>Download Resource</a>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No files shared yet.")
+
+        st.markdown("---")
+        st.markdown("#### 🖼️ Session Visual Gallery")
+        sketch_title = st.text_input("Visual Title / Sketch Name:", placeholder="e.g., Architecture Diagram")
+        if st.button("Archive Visual Sketch"):
+            if sketch_title:
+                st.session_state.visual_gallery[chat_partner].append({"title": sketch_title, "author": user_name, "type": "Design Canvas"})
+                st.success("Visual archived to gallery!")
+        
+        if st.session_state.visual_gallery[chat_partner]:
+            for vis in st.session_state.visual_gallery[chat_partner]:
+                st.markdown(f"""
+                <div style='background-color: #FFFFFF; border: 1px solid #CBD5E1; padding: 10px; border-radius: 6px; margin-bottom: 8px;'>
+                    🎨 <b>{vis.get('title')}</b><br>
+                    <small style='color: #64748B;'>Archived by: {vis.get('author')}</small>
+                </div>
+                """, unsafe_allow_html=True)
+
+# --- PAGE 6: AI EXCUSE & PARTNER AUDIT ---
+elif page == "🛡️ AI Excuse & Partner Audit":
+    st.header("🛡️ Partner Verification & AI Excuse Audit System")
+    st.write("Need to reschedule a session? Submit your excuse for dual-layer verification: **Partner Sign-off** & **AI Policy Check**.")
+    
+    current_used = st.session_state.excuse_count
+    remaining = max(0, 2 - current_used)
+    st.info(f"📅 **User Monthly Policy Tracker:** You have used **{current_used} of 2** allowed approved excuses this month. (**{remaining}** remaining)")
+    
+    st.markdown("### 🎬 Demo Simulation Mode")
+    sim_mode = st.radio(
+        "Switch View Mode for Demo Recording:",
+        ["1. User View: Submit Excuse & Request Rescheduling", "2. Partner View: Review & Write Custom Note"],
+        horizontal=True
+    )
+    
+    col_a, col_b = st.columns(2)
+    with col_a:
+        assigned_partner = st.selectbox("Select Your Learning Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="audit_partner_select")
+    with col_b:
+        excuse_type_label = st.selectbox("Excuse Category:", ["Internet Outage / Technical", "Health Emergency / Sick", "University Exam / Academic", "Family Emergency"])
+    
+    if sim_mode.startswith("1"):
+        st.markdown("#### 📤 Step 1: Submit Excuse (As User)")
+        excuse_text = st.text_area("Describe reason for rescheduling:", placeholder="e.g., Sudden power outage and internet disconnection...")
+        
+        if st.button("Submit for Partner & AI Audit"):
+            if excuse_text:
+                st.session_state.pending_excuse = {
+                    "user": user_name,
+                    "partner": assigned_partner,
+                    "excuse_type": excuse_type_label,
+                    "text": excuse_text
+                }
+                st.success(f"⏳ **Status: Pending Partner Verification.** Excuse sent to **{assigned_partner}** successfully! Switch to *Partner View* above to review and sign off.")
+            else:
+                st.warning("Please describe your reason first.")
+                
+    else:
+        st.markdown("#### 📥 Step 2: Partner Review & Sign-off (As Partner)")
+        
+        p_approvals_used = st.session_state.partner_approval_count
+        st.info(f"🛡️ **Partner Governance Quota:** Partner Approvals Used: **{p_approvals_used} of 5** allowed this month.")
+        
+        current_pending = st.session_state.get("pending_excuse", {})
+        p_user = current_pending.get("user", user_name)
+        p_text = current_pending.get("text", "No excuse text provided.")
+        p_category = current_pending.get("excuse_type", excuse_type_label)
+        
+        st.write(f"👤 **Reviewing excuse from {p_user}:** '{p_text}' (Category: *{p_category}*)")
+        
+        st.markdown(
+            "> ⚖️ **PeerHub Rights Protection Disclaimer:** PeerHub protects your learning rights, giving you the power to carefully review, comment, and explicitly accept or reject your partner's excuse."
+        )
+        
+        partner_feedback_note = st.text_input(
+            "Partner's Written Review Note / Reason:", 
+            placeholder="e.g., Partner's Review Note: I confirm we agreed on rescheduling this session..."
+        )
+        
+        col_p1, col_p2 = st.columns(2)
+        with col_p1:
+            if st.button("✅ Approve Partner Rescheduling"):
+                if not partner_feedback_note:
+                    st.warning("Please write a custom approval note before submitting.")
+                else:
+                    if st.session_state.partner_approval_count >= 5:
+                        st.error("🚨 **Partner Monthly Approval Limit Reached (5/5).**")
+                        st.warning("To protect learning commitments, extra reschedules require direct platform mediation or standard penalty rules.")
+                    else:
+                        reason_lower = p_text.lower()
+                        weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
+                        is_weak = any(w in reason_lower for w in weak_triggers)
+                        
+                        if st.session_state.excuse_count >= 2:
+                            st.error("🚨 **User Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
+                            st.session_state.audit_log.insert(0, {
+                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
+                                "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded",
+                                "partner_note": partner_feedback_note
+                            })
+                        elif is_weak:
+                            st.warning("⚠️ **AI Audit Flagged:** Approved by partner, but flagged by AI as weak reason.")
+                        else:
+                            st.session_state.excuse_count += 1
+                            st.session_state.partner_approval_count += 1
+                            st.success("✅ **Verified Rescheduling Demand Approved!** Both users are bound to the makeup session time. Zero credit penalty.")
+                            st.session_state.audit_log.insert(0, {
+                                "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
+                                "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Verified Rescheduling Demand",
+                                "partner_note": partner_feedback_note
+                            })
+                            st.balloons()
+                    
+        with col_p2:
+            if st.button("❌ Reject & Flag"):
+                if not partner_feedback_note:
+                    st.warning("Please write a custom rejection note explaining why.")
+                else:
+                    st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
+                    st.session_state.audit_log.insert(0, {
+                        "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
+                        "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner",
+                        "partner_note": partner_feedback_note
+                    })
+
+    st.markdown("---")
+    st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
+    st.write("Recent peer session accountability audits visible to judges in real-time:")
+    
+    st.table(st.session_state.audit_log)
+
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: #64748B;'>PeerHub Full-Stack App — Powered by Supabase & Streamlit (Thirduni - October 2026)</p>", unsafe_allow_html=True)
