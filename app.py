@@ -31,6 +31,14 @@ if "audit_log" not in st.session_state:
         {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Approved by Partner & AI", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
     ]
 
+if "pending_excuse" not in st.session_state:
+    st.session_state.pending_excuse = {
+        "user": "Feriel",
+        "partner": "Maria",
+        "excuse_type": "Internet Outage / Technical",
+        "text": "Sudden internet outage and power cut before session."
+    }
+
 # --- SIDEBAR & USER PROFILE SETUP ---
 st.sidebar.markdown("## 📝 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
@@ -168,7 +176,15 @@ with tab3:
                 
     else:
         st.markdown("#### 📥 Step 2: Partner Review & Sign-off (As Partner)")
-        st.info(f"👤 Logged in as Partner (**{assigned_partner}** reviewing request from **{user_name}**):")
+        
+        # Safely retrieve pending excuse text and details
+        current_pending = st.session_state.get("pending_excuse", {})
+        p_user = current_pending.get("user", user_name)
+        p_text = current_pending.get("text", "No excuse text provided.")
+        p_category = current_pending.get("excuse_type", excuse_type_label)
+        
+        # Display clear message showing the excuse from the user
+        st.info(f"👤 **Reviewing excuse from {p_user}:** '{p_text}' (Category: *{p_category}*)")
         
         # Rights Protection Disclaimer
         st.markdown(
@@ -187,15 +203,14 @@ with tab3:
                 if not partner_feedback_note:
                     st.warning("Please write a custom approval note before submitting.")
                 else:
-                    pending_text = st.session_state.get("pending_excuse", {}).get("text", "Internet outage")
-                    reason_lower = pending_text.lower()
+                    reason_lower = p_text.lower()
                     weak_triggers = ["lazy", "forgot", "bored", "playing", "sleep"]
                     is_weak = any(w in reason_lower for w in weak_triggers)
                     
                     if st.session_state.excuse_count >= 2:
                         st.error("🚨 **Limit Exceeded!** 3rd excuse attempt rejected despite partner sign-off. Penalty applied.")
                         st.session_state.audit_log.insert(0, {
-                            "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
+                            "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
                             "monthly_count": "3/2 (Exceeded)", "status": "Rejected - Limit Exceeded",
                             "partner_note": partner_feedback_note
                         })
@@ -205,7 +220,7 @@ with tab3:
                         st.session_state.excuse_count += 1
                         st.success("✅ **Approved by Partner & AI Policy Check!** Zero credit penalty. Badge protected.")
                         st.session_state.audit_log.insert(0, {
-                            "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
+                            "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
                             "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Approved by Partner & AI",
                             "partner_note": partner_feedback_note
                         })
@@ -218,7 +233,7 @@ with tab3:
                 else:
                     st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
                     st.session_state.audit_log.insert(0, {
-                        "user": user_name, "partner": assigned_partner, "excuse_type": excuse_type_label, 
+                        "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
                         "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner",
                         "partner_note": partner_feedback_note
                     })
