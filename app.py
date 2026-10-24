@@ -36,7 +36,7 @@ if st.sidebar.button("Save Profile to Cloud"):
             "teach_skill": teach_skill,
             "learn_skill": learn_skill
         }
-        supabase.table("Profiles").insert(data).execute()
+       supabase.table("Profiles").insert(data).execute()
         st.sidebar.success("Profile saved successfully to Supabase! 🎉")
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
