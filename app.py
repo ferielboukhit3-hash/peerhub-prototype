@@ -25,8 +25,8 @@ except Exception as e:
 # --- SIDEBAR & USER PROFILE SETUP ---
 st.sidebar.markdown("## 📝 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
-teach_skill = st.sidebar.text_input("What skill can you teach?", "Python Programming")
-learn_skill = st.sidebar.text_input("What skill do you want to learn?", "Spanish")
+teach_skill = st.sidebar.text_input("What skill can you teach?", "spanish")
+learn_skill = st.sidebar.text_input("What skill do you want to learn?", "Python Programmin")
 
 if st.sidebar.button("Save Profile to Cloud"):
     try:
@@ -36,7 +36,7 @@ if st.sidebar.button("Save Profile to Cloud"):
             "teach_skill": teach_skill,
             "learn_skill": learn_skill
         }
-        supabase.table("profiles").upsert(data, on_conflict="name").execute()
+        supabase.table("Profiles").upsert(data, on_conflict="name").execute()
         st.sidebar.success("Profile saved successfully to Supabase! 🎉")
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
