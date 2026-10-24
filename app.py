@@ -122,7 +122,7 @@ if st.sidebar.button("Save Profile to Cloud"):
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
 
-# --- NEW STRUCTURED NAVIGATION (SIDEBAR RADIO FOR PAGE SWITCHING) ---
+# --- NAVIGATION VIA SIDEBAR RADIO ---
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🧭 Platform Navigation")
 page = st.sidebar.radio(
@@ -403,4 +403,22 @@ elif page == "🛡️ AI Excuse & Partner Audit":
                             st.balloons()
                     
         with col_p2:
-            if st.button
+            if st.button("❌ Reject & Flag"):
+                if not partner_feedback_note:
+                    st.warning("Please write a custom rejection note explaining why.")
+                else:
+                    st.error("❌ **Rescheduling Request Rejected by Partner.** Credit penalty applied.")
+                    st.session_state.audit_log.insert(0, {
+                        "user": p_user, "partner": assigned_partner, "excuse_type": p_category, 
+                        "monthly_count": f"{st.session_state.excuse_count}/2", "status": "Rejected by Partner",
+                        "partner_note": partner_feedback_note
+                    })
+
+    st.markdown("---")
+    st.subheader("🌐 Community Trust & Audit Log (Public Ledger)")
+    st.write("Recent peer session accountability audits visible to judges in real-time:")
+    
+    st.table(st.session_state.audit_log)
+
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: #64748B;'>PeerHub Full-Stack App — Powered by Supabase & Streamlit (Thirduni - October 2026)</p>", unsafe_allow_html=True)
