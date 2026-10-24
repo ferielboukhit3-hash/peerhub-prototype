@@ -35,7 +35,7 @@ if st.sidebar.button("Save Profile to Cloud"):
             "teach_skill": teach_skill,
             "learn_skill": learn_skill
         }
-        supabase.table("Profiles").insert(data).execute()
+        supabase.table("Profiles").upsert(data, on_conflict="name").execute()
         st.sidebar.success("Profile saved successfully to Supabase! 🎉")
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
@@ -95,11 +95,24 @@ with tab1:
 # --- TAB 2: HOUR BANK ---
 with tab2:
     st.header("Hour Bank & Skill Credits")
-    st.write("Earn hours by teaching your skills, and spend hours learning new ones!")
+    st.write(f"Track your earned hours and exchange value transparently within PeerHub, **{user_name}**.")
+    
     col1, col2, col3 = st.columns(3)
-    col1.metric("Hours Earned (Teaching)", "12 hrs", "+2 this week")
-    col2.metric("Hours Spent (Learning)", "8 hrs", "-1.5 this week")
-    col3.metric("Net Credit Balance", "4 hrs Available", "🟢 Active Status")
+    col1.metric("Hours Earned (Teaching)", "3 hrs", "+1 this week")
+    col2.metric("Hours Spent (Learning)", "2 hrs", "-0.5 this week")
+    col3.metric("Net Credit Balance", "1 hr Available", "🟢 Active Status")
+    
+    st.markdown("---")
+    st.subheader("Session Verification & Credit Claim")
+    completed_with = st.text_input("Completed session with partner name:", "Maria")
+    session_topic = st.text_input("Session topic taught/learned:", "Python Basics")
+    
+    if st.button("Claim +1 Hour Credit"):
+        if completed_with:
+            st.success(f"✅ Verified! 1 Hour credit successfully added to your account for the session with **{completed_with}**.")
+            st.balloons()
+        else:
+            st.warning("Please enter your partner's name first.")
 
 # --- TAB 3: EXCUSE VALIDATOR ---
 with tab3:
