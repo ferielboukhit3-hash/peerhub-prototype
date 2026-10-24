@@ -25,18 +25,17 @@ except Exception as e:
 # --- SIDEBAR & USER PROFILE SETUP ---
 st.sidebar.markdown("## 📝 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
-teach_skill = st.sidebar.text_input("What skill can you teach?", "Python Programmin")
+teach_skill = st.sidebar.text_input("What skill can you teach?", "Python Programming")
 learn_skill = st.sidebar.text_input("What skill do you want to learn?", "Spanish")
 
 if st.sidebar.button("Save Profile to Cloud"):
     try:
-        # Save or update user profile in Supabase table 'profiles'
         data = {
             "name": user_name,
             "teach_skill": teach_skill,
             "learn_skill": learn_skill
         }
-       supabase.table("Profiles").insert(data).execute()
+        supabase.table("Profiles").insert(data).execute()
         st.sidebar.success("Profile saved successfully to Supabase! 🎉")
     except Exception as ex:
         st.sidebar.error(f"Error saving profile: {ex}")
@@ -58,11 +57,9 @@ with tab1:
     if st.button("🔍 Find Perfect Match from Database"):
         with st.spinner("Searching live database for potential partners..."):
             try:
-                # Fetch profiles from Supabase where skills complement yours
-                response = supabase.table("profiles").select("*").execute()
+                response = supabase.table("Profiles").select("*").execute()
                 users = response.data
                 
-                # Filter matches: someone who wants to learn what you teach OR teach what you want to learn
                 matches = [
                     u for u in users 
                     if u.get("name") != user_name and (
@@ -86,7 +83,6 @@ with tab1:
                 else:
                     st.info("No direct matches found in the live database yet. Try broadening your skills or invite fellow students!")
                     
-                    # Display fallback simulated community pool for demo richness
                     st.markdown("### 🌟 Community Skill Pool (Live Preview)")
                     st.markdown("""
                     - 👤 **Anfal** | Teaches: `Data Science` | Wants: `French`
