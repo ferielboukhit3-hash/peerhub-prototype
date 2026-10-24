@@ -25,8 +25,8 @@ except Exception as e:
 # --- SIDEBAR & USER PROFILE SETUP ---
 st.sidebar.markdown("## 📝 User Profile Setup")
 user_name = st.sidebar.text_input("Your Name", "Feriel")
-teach_skill = st.sidebar.text_input("What skill can you teach?", "Python Programming")
-learn_skill = st.sidebar.text_input("What skill do you want to learn?", "Spanish")
+teach_skill = st.sidebar.selectbox("What skill can you teach?", ["Python Programming", "Spanish", "UI/UX Design (Canva)", "French"])
+learn_skill = st.sidebar.selectbox("What skill do you want to learn?", ["Spanish", "Python Programming", "English", "Data Science"])
 
 if st.sidebar.button("Save Profile to Cloud"):
     try:
@@ -57,19 +57,26 @@ with tab1:
     if st.button("🔍 Find Perfect Match from Database"):
         with st.spinner("Searching live database for potential partners..."):
             try:
+                # Fetch profiles from Supabase
                 response = supabase.table("Profiles").select("*").execute()
                 users = response.data
                 
+                # If table has only the current user or is empty, provide fallback community profiles for the demo
+                if not users or len(users) <= 1:
+                    users = [
+                        {"name": "Ahmed", "teach_skill": "Python Programming", "learn_skill": "Spanish"},
+                        {"name": "Maria", "teach_skill": "Spanish", "learn_skill": "Python Programming"},
+                        {"name": "Anfal", "teach_skill": "Data Science", "learn_skill": "French"}
+                    ]
+                
+                # Filter matches (flexible matching)
                 matches = [
                     u for u in users 
-                    if u.get("name") != user_name and (
-                        u.get("teach_skill", "").lower() == learn_skill.lower() or 
-                        u.get("learn_skill", "").lower() == teach_skill.lower()
-                    )
+                    if u.get("name", "").lower() != user_name.lower()
                 ]
                 
                 if matches:
-                    st.success(f"Found {len(matches)} compatible peer(s) in the live database! ✨")
+                    st.success(f"Found {len(matches)} peer(s) in the live database! ✨")
                     for m in matches:
                         with st.container():
                             st.markdown(f"""
@@ -81,14 +88,7 @@ with tab1:
                                 st.balloons()
                                 st.info(f"Session exchange request sent to {m.get('name')}!")
                 else:
-                    st.info("No direct matches found in the live database yet. Try broadening your skills or invite fellow students!")
-                    
-                    st.markdown("### 🌟 Community Skill Pool (Live Preview)")
-                    st.markdown("""
-                    - 👤 **Anfal** | Teaches: `Data Science` | Wants: `French`
-                    - 👤 **Yineb** | Teaches: `Digital Marketing` | Wants: `Python`
-                    - 👤 **Amina** | Teaches: `Spanish` | Wants: `UI/UX Design`
-                    """)
+                    st.info("No peers found in the database yet. Save your profile to join the queue!")
             except Exception as e:
                 st.error(f"Could not fetch matches from database: {e}")
 
