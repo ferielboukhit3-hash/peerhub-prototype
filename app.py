@@ -35,6 +35,17 @@ if "user_credits" not in st.session_state:
 if "completed_sessions" not in st.session_state:
     st.session_state.completed_sessions = 4
 
+if "chat_messages" not in st.session_state:
+    st.session_state.chat_messages = {
+        "Maria": [
+            {"sender": "Maria", "text": "Hi Feriel! Ready for our Python and Spanish session today?"},
+            {"sender": "Feriel", "text": "Hello Maria! Yes, absolutely. Let's start with Python basics."}
+        ],
+        "Ahmed": [
+            {"sender": "Ahmed", "text": "Hi! Let me know when you want to review the data science module."}
+        ]
+    }
+
 if "audit_log" not in st.session_state:
     st.session_state.audit_log = [
         {"user": "Feriel", "partner": "Maria", "excuse_type": "Internet Outage", "monthly_count": "1/2", "status": "Verified Rescheduling Demand", "partner_note": "Partner's Review Note: I confirm we agreed on rescheduling this session."}
@@ -72,8 +83,8 @@ st.subheader("Interactive Skill Exchange & Live Peer-to-Peer Learning Ecosystem"
 
 st.markdown("---")
 
-# Navigation Tabs
-tab1, tab2, tab3 = st.tabs(["🔍 Matching Engine", "💰 Hour Bank & Credits", "🛡️ AI Excuse & Partner Audit"])
+# Navigation Tabs (Added Partner Chat & Messages Tab)
+tab1, tab2, tab3, tab4 = st.tabs(["🔍 Matching Engine", "💰 Hour Bank & Credits", "💬 Partner Chat & Messages", "🛡️ AI Excuse & Partner Audit"])
 
 # --- TAB 1: SMART SKILL BARTER MATCHING ENGINE ---
 with tab1:
@@ -94,7 +105,6 @@ with tab1:
                         {"name": "Amir", "teach_skill": "UI/UX Design (Canva)", "learn_skill": "Python Programming", "badge": "Creative Contributor 🎨", "credits": 4}
                     ]
                 
-                # Filter matches based on bartering complementarity
                 matches = [
                     u for u in users 
                     if u.get("name", "").lower() != user_name.lower()
@@ -124,7 +134,6 @@ with tab2:
     st.header("Hour Bank & Skill Credits")
     st.write(f"Track your earned hours and exchange value transparently within PeerHub, **{user_name}**.")
     
-    # Hour Bank & Credits Visual Cards
     col1, col2, col3 = st.columns(3)
     col1.metric("Available Learning Credits", f"{st.session_state.user_credits} Hours", "+1 this week")
     col2.metric("Completed Sessions", f"{st.session_state.completed_sessions} Sessions", "100% Success")
@@ -144,8 +153,52 @@ with tab2:
         else:
             st.warning("Please enter your partner's name first.")
 
-# --- TAB 3: AI EXCUSE & PARTNER AUDIT SYSTEM ---
+# --- TAB 3: PARTNER CHAT & DIRECT MESSAGING HUB ---
 with tab3:
+    st.header("💬 Partner Chat & Direct Messaging Hub")
+    st.write("Communicate directly with your assigned learning partners in real-time to coordinate sessions and exchange notes.")
+    
+    # Partner selection for chat
+    chat_partner = st.selectbox("Select Active Chat Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="chat_partner_select")
+    
+    # Connection State Indicator
+    st.markdown(f"🟢 **Connection State:** Connected securely with **{chat_partner}** (Active P2P Encrypted Channel)")
+    st.markdown("---")
+    
+    # Ensure chat history exists for this partner
+    if chat_partner not in st.session_state.chat_messages:
+        st.session_state.chat_messages[chat_partner] = [
+            {"sender": chat_partner, "text": f"Hello {user_name}! Looking forward to our next skill exchange session."}
+        ]
+    
+    # Display conversation thread container
+    chat_container = st.container()
+    with chat_container:
+        st.markdown(f"#### Conversation Thread with {chat_partner}")
+        for msg in st.session_state.chat_messages[chat_partner]:
+            sender = msg.get("sender")
+            text = msg.get("text")
+            if sender == user_name:
+                st.markdown(f"<div style='text-align: right; background-color: #e0f2fe; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>You:</b> {text}</div>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<div style='text-align: left; background-color: #f3f4f6; padding: 10px; border-radius: 10px; margin: 5px 0;'><b>{sender}:</b> {text}</div>", unsafe_allow_html=True)
+                
+    st.markdown("---")
+    
+    # Message input form
+    with st.form(key="chat_form", clear_on_submit=True):
+        new_message = st.text_input("Type your message here:", placeholder="Type a message to coordinate your session...")
+        submit_chat = st.form_submit_button("Send Message 📤")
+        
+        if submit_chat and new_message:
+            # Append user message
+            st.session_state.chat_messages[chat_partner].append({"sender": user_name, "text": new_message})
+            # Simulate automatic polite partner reply for interactive demo experience
+            st.session_state.chat_messages[chat_partner].append({"sender": chat_partner, "text": f"Got it, {user_name}! Let's confirm that schedule."})
+            st.rerun()
+
+# --- TAB 4: AI EXCUSE & PARTNER AUDIT SYSTEM ---
+with tab4:
     st.header("🛡️ Partner Verification & AI Excuse Audit System")
     st.write("Need to reschedule a session? Submit your excuse for dual-layer verification: **Partner Sign-off** & **AI Policy Check**.")
     
@@ -164,7 +217,7 @@ with tab3:
     
     col_a, col_b = st.columns(2)
     with col_a:
-        assigned_partner = st.selectbox("Select Your Learning Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"])
+        assigned_partner = st.selectbox("Select Your Learning Partner:", ["Maria", "Ahmed", "Amir", "Lina", "Chaima"], key="audit_partner_select")
     with col_b:
         excuse_type_label = st.selectbox("Excuse Category:", ["Internet Outage / Technical", "Health Emergency / Sick", "University Exam / Academic", "Family Emergency"])
     
@@ -217,7 +270,6 @@ with tab3:
                 if not partner_feedback_note:
                     st.warning("Please write a custom approval note before submitting.")
                 else:
-                    # Check partner approval limit (Max 5 approvals per partner per month)
                     if st.session_state.partner_approval_count >= 5:
                         st.error("🚨 **Partner Monthly Approval Limit Reached (5/5).**")
                         st.warning("To protect learning commitments, extra reschedules require direct platform mediation or standard penalty rules.")
