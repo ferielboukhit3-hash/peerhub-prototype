@@ -120,7 +120,7 @@ if "initialized" not in st.session_state:
         }
     ]
 
-    # Community Directory Users (Mock + Supabase Ready)
+    # Community Directory Users
     st.session_state.directory_users = [
         {"name": "Feriel Boukhit", "age": 21, "gender": "Woman", "teach": "Python Programming (Intermediate)", "learn": "Spanish (Beginner)", "avatar": "👩‍💻", "rating": 4.9},
         {"name": "Anfal Fittih", "age": 22, "gender": "Woman", "teach": "Spanish & Literature (Advanced)", "learn": "Python Programming", "avatar": "📚", "rating": 4.8},
@@ -168,7 +168,6 @@ if page == "🏠 Home & Posts (Community Feed)":
     st.markdown("# 🏠 Community Feed & Learning Wall")
     st.markdown("Share your learning progress, discover insights from peers, and collaborate in real-time.")
     
-    # Create New Post Box
     with st.form("new_post_form", clear_on_submit=True):
         st.markdown("### ✍️ Share an update or question")
         new_post_content = st.text_area("What are you working on today?", placeholder="Write your thoughts, ask a question, or share a milestone...", height=100)
@@ -193,7 +192,6 @@ if page == "🏠 Home & Posts (Community Feed)":
     st.markdown("---")
     st.markdown("### 📰 Recent Community Activity")
 
-    # Display Feed Posts
     for idx, post in enumerate(st.session_state.posts):
         with st.container():
             st.markdown(f"""
@@ -228,7 +226,6 @@ elif page == "👥 Community Directory":
     st.markdown("# 👥 Community Directory")
     st.markdown("Explore active learners and instructors across the PeerHub network.")
 
-    # Search and Filters
     col_search, col_gender, col_skill = st.columns([2, 1, 1])
     with col_search:
         search_query = st.text_input("🔍 Search users by name or skill", placeholder="Type a name or topic...")
@@ -239,7 +236,6 @@ elif page == "👥 Community Directory":
 
     st.markdown("---")
 
-    # Filter Logic
     filtered_users = st.session_state.directory_users
     if search_query:
         filtered_users = [u for u in filtered_users if search_query.lower() in u['name'].lower() or search_query.lower() in u['teach'].lower() or search_query.lower() in u['learn'].lower()]
@@ -248,9 +244,10 @@ elif page == "👥 Community Directory":
     if skill_filter != "All":
         filtered_users = [u for u in filtered_users if skill_filter.lower() in u['teach'].lower() or skill_filter.lower() in u['learn'].lower()]
 
-    # Render User Cards in Grid
     if not filtered_users:
         st.warning("No matching users found. Try broadening your search criteria.")
     else:
-        cols = st.columns(2)
-        for
+        for u in filtered_users:
+            st.markdown(f"""
+                <div class="card">
+                    <h3>{u['avatar']} {u['name']} ({u['gender']}, {u['age']})
