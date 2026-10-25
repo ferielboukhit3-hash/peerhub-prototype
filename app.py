@@ -185,4 +185,192 @@ if page == "🏠 Home & Posts (Community Feed)":
                 "comments": 0,
                 "liked_by_user": False
             }
-            st.session_state.posts.insert(0, new
+            st.session_state.posts.insert(0, new_entry)
+            st.success("Post published successfully!")
+            st.rerun()
+
+    st.markdown("---")
+    st.markdown("### 📰 Recent Community Activity")
+
+    for idx, post in enumerate(st.session_state.posts):
+        with st.container():
+            st.markdown(f"""
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong>👤 {post['author']}</strong>
+                        <span style="color: #6E7191; font-size: 0.85rem;">{post['time']}</span>
+                    </div>
+                    <p style="font-size: 1.05rem; color: #1B1F3B; margin-bottom: 1rem;">{post['content']}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            c1, c2, c3 = st.columns([1, 1, 4])
+            with c1:
+                like_label = f"❤️ {post['likes']}" if not post['liked_by_user'] else f"💖 {post['likes']}"
+                if st.button(like_label, key=f"like_{post['id']}"):
+                    if post['liked_by_user']:
+                        post['likes'] -= 1
+                        post['liked_by_user'] = False
+                    else:
+                        post['likes'] += 1
+                        post['liked_by_user'] = True
+                    st.rerun()
+            with c2:
+                if st.button(f"💬 {post['comments']} Comments", key=f"comment_{post['id']}"):
+                    st.toast(f"Opening discussion thread for post #{post['id']}")
+
+# -----------------------------------------------------------------------------
+# 2. COMMUNITY DIRECTORY PAGE
+# -----------------------------------------------------------------------------
+elif page == "👥 Community Directory":
+    st.markdown("# 👥 Community Directory")
+    st.markdown("Explore active learners and instructors across the PeerHub network.")
+
+    col_search, col_gender, col_skill = st.columns([2, 1, 1])
+    with col_search:
+        search_query = st.text_input("🔍 Search users by name or skill", placeholder="Type a name or topic...")
+    with col_gender:
+        gender_filter = st.selectbox("Filter by Gender", ["All", "Woman", "Man"])
+    with col_skill:
+        skill_filter = st.selectbox("Filter by Skill Domain", ["All", "Python Programming", "Spanish", "Digital Marketing", "UI/UX Design", "Macroeconomics"])
+
+    st.markdown("---")
+
+    filtered_users = st.session_state.directory_users
+    if search_query:
+        filtered_users = [u for u in filtered_users if search_query.lower() in u['name'].lower() or search_query.lower() in u['teach'].lower() or search_query.lower() in u['learn'].lower()]
+    if gender_filter != "All":
+        filtered_users = [u for u in filtered_users if u['gender'] == gender_filter]
+    if skill_filter != "All":
+        filtered_users = [u for u in filtered_users if skill_filter.lower() in u['teach'].lower() or skill_filter.lower() in u['learn'].lower()]
+
+    if not filtered_users:
+        st.warning("No matching users found. Try broadening your search criteria.")
+    else:
+        for u in filtered_users:
+            card_html = (
+                f"<div class='card'>"
+                f"<h3>{u['avatar']} {u['name']} ({u['gender']}, {u['age']})</h3>"
+                f"<p><b>Can Teach:</b> {u['teach']}</p>"
+                f"<p><b>Wants to Learn:</b> {u['learn']}</p>"
+                f"<p><b>Community Rating:</b> ⭐ {u['rating']} / 5.0</p>"
+                f"</div>"
+            )
+            st.markdown(card_html, unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# 3. CHATS & DIRECT HUB
+# -----------------------------------------------------------------------------
+elif page == "💬 Chats & Direct Hub":
+    st.markdown("# 💬 Chats & Direct Messaging Hub")
+    st.markdown("Coordinate sessions with learning partners, share resources, and upload files.")
+
+    chat_partner = st.selectbox("Select Partner Conversation:", list(st.session_state.chats.keys()))
+    
+    chat_col, vault_col = st.columns([2, 1])
+    with chat_col:
+        st.markdown(f"### 💬 Conversation with {chat_partner}")
+        chat_box = st.container(height=350)
+        with chat_box:
+            for msg in st.session_state.chats[chat_partner]:
+                sender = msg['sender']
+                text = msg['text']
+                time = msg.get('time', '')
+                if sender == "Feriel":
+                    st.markdown(f"<div style='text-align: right; background-color: #DBE2EF; padding: 10px; border-radius: 8px; margin: 6px 0;'><b>You:</b> {text} <br><small style='color: #6E7191;'>{time}</small></div>", unsafe_allow_html=True)
+                else:
+                    st.markdown(f"<div style='text-align: left; background-color: #FFFFFF; border: 1px solid #E1E1E6; padding: 10px; border-radius: 8px; margin: 6px 0;'><b>{sender}:</b> {text} <br><small style='color: #6E7191;'>{time}</small></div>", unsafe_allow_html=True)
+
+        with st.form("chat_input_form", clear_on_submit=True):
+            user_msg = st.text_input("Type your message...", placeholder="Coordinate your study session...")
+            c_btn1, c_btn2, c_btn3 = st.columns([4, 1, 1])
+            with c_btn1:
+                send_clicked = st.form_submit_button("Send 📤")
+            with c_btn2:
+                attachment_btn = st.form_submit_button("📎 File")
+            with c_btn3:
+                mic_btn = st.form_submit_button("🎤 Voice")
+                
+            if send_clicked and user_msg.strip():
+                st.session_state.chats[chat_partner].append({"sender": "Feriel", "text": user_msg.strip(), "time": "Just now"})
+                st.session_state.chats[chat_partner].append({"sender": chat_partner, "text": f"Got it, Feriel! Let's connect.", "time": "Just now"})
+                st.rerun()
+            elif attachment_btn:
+                st.toast("📎 File vault picker opened.")
+            elif mic_btn:
+                st.toast("🎤 Voice message recorded successfully.")
+
+    with vault_col:
+        st.markdown("### 📁 Document Vault")
+        uploaded_file = st.file_uploader("Upload study material", type=["pdf", "png", "jpg", "py", "txt"])
+        if uploaded_file:
+            st.success(f"Uploaded {uploaded_file.name} successfully!")
+        st.info("Shared study resources and sketches appear here securely.")
+
+# -----------------------------------------------------------------------------
+# 4. MY PROFILE PAGE
+# -----------------------------------------------------------------------------
+elif page == "👤 My Profile":
+    st.markdown("# 👤 My Professional Profile")
+    
+    # Top Utility Bar
+    p_col1, p_col2, p_col3 = st.columns(3)
+    with p_col1:
+        if st.button("📅 Session Time Schedule"):
+            st.info("🕒 Your upcoming sessions: Python & Spanish exchange tomorrow at 16:00.")
+    with p_col2:
+        if st.button("⚙️ Parameters & Settings"):
+            st.session_state.profile['dark_mode'] = st.toggle("Dark Mode Toggle", value=st.session_state.profile['dark_mode'])
+    with p_col3:
+        st.markdown(f"**Status:** 🟢 Available for Sessions")
+
+    st.markdown("---")
+
+    # Profile Header Card with Banner & Avatar
+    st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #0A66C2 0%, #1B1F3B 100%); height: 130px; border-radius: 12px 12px 0 0; padding: 20px; color: white;">
+            <h2>💼 PeerHub Learning Portfolio</h2>
+        </div>
+        <div class="card" style="border-radius: 0 0 12px 12px; margin-top: -1rem;">
+            <h2>👩‍💻 {st.session_state.profile['full_name']}</h2>
+            <p style="color: #6E7191; font-size: 1.05rem;">{st.session_state.profile['title']}</p>
+            <p style="color: #6E7191; font-size: 0.95rem;">📍 {st.session_state.profile['location']}</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    profile_col1, profile_col2 = st.columns([2, 1])
+
+    with profile_col1:
+        st.markdown("### 📝 About Me")
+        new_about = st.text_area("Edit your bio:", value=st.session_state.profile['about'], height=100)
+        if new_about != st.session_state.profile['about']:
+            st.session_state.profile['about'] = new_about
+
+        st.markdown("### 💡 Skills & Proficiency Levels")
+        s_col1, s_col2 = st.columns(2)
+        with s_col1:
+            st.session_state.profile['teach_skill'] = st.selectbox("Teaching Skill:", ["Python Programming", "Spanish", "French", "Digital Marketing"], index=0)
+            st.session_state.profile['teach_level'] = st.selectbox("Teaching Level:", ["Beginner", "Intermediate", "Advanced", "Expert"], index=1)
+        with s_col2:
+            st.session_state.profile['learn_skill'] = st.selectbox("Learning Goal:", ["Spanish", "Python Programming", "Korean", "Data Science"], index=0)
+            st.session_state.profile['learn_level'] = st.selectbox("Learning Level:", ["Beginner", "Intermediate", "Advanced"], index=0)
+
+        st.markdown("### ✍️ My Published Posts")
+        user_posts = [p for p in st.session_state.posts if p['author'] == st.session_state.profile['full_name']]
+        if user_posts:
+            for p in user_posts:
+                st.markdown(f"<div class='card'>💬 <b>{p['time']}:</b> {p['content']}</div>", unsafe_allow_html=True)
+        else:
+            st.info("You haven't published any posts yet.")
+
+    with profile_col2:
+        st.markdown("### 📊 Performance Metrics")
+        st.metric("Completed Sessions", f"{st.session_state.profile['completed_sessions']}", "+1 this week")
+        st.metric("Hours Earned", f"{st.session_state.profile['hours_earned']} hrs", "🟢 Active Balance")
+        st.metric("Community Rating", f"⭐ {st.session_state.profile['rating']} / 5.0", "Top Rated")
+
+        st.markdown("### 🏆 Streaks & Badges")
+        st.markdown("<span class='badge'>Reliable Partner ⭐</span>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Streak Master 🔥</span>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Python Pro 🐍</span>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Top Contributor 🚀</span>", unsafe_allow_html=True)
