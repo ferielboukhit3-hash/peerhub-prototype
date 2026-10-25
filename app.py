@@ -102,7 +102,7 @@ if "initialized" not in st.session_state:
         },
         {
             "id": 2,
-            "author": "malak dechicha",
+            "author": "Anfal Fittih",
             "time": "Yesterday",
             "content": "Working on advanced Spanish verb conjugations today. If anyone wants to practice conversational tandem sessions this evening, let me know!",
             "likes": 8,
@@ -111,7 +111,7 @@ if "initialized" not in st.session_state:
         },
         {
             "id": 3,
-            "author": "Karima khelifi",
+            "author": "Karim Benzema",
             "time": "3 days ago",
             "content": "Shared a new template for digital marketing analytics and ROI tracking in the Document Vault. Check it out if you're exploring e-commerce metrics!",
             "likes": 19,
@@ -123,20 +123,20 @@ if "initialized" not in st.session_state:
     # Community Directory Users (Mock + Supabase Ready)
     st.session_state.directory_users = [
         {"name": "Feriel Boukhit", "age": 21, "gender": "Woman", "teach": "Python Programming (Intermediate)", "learn": "Spanish (Beginner)", "avatar": "👩‍💻", "rating": 4.9},
-        {"name": "malak dechicha", "age": 22, "gender": "Woman", "teach": "Spanish & Literature (Advanced)", "learn": "Python Programming", "avatar": "📚", "rating": 4.8},
-        {"name": "lina Larbi", "age": 24, "gender": "Man", "teach": "Data Structures & Algorithms", "learn": "Digital Marketing", "avatar": "👨‍💻", "rating": 4.7},
-        {"name": "Sarah lily", "age": 23, "gender": "Woman", "teach": "UI/UX Design & Figma", "learn": "French Fluency", "avatar": "🎨", "rating": 5.0},
-        {"name": "Yacine toumi", "age": 25, "gender": "Man", "teach": "Macroeconomics & Finance", "learn": "Korean Language", "avatar": "📊", "rating": 4.6}
+        {"name": "Anfal Fittih", "age": 22, "gender": "Woman", "teach": "Spanish & Literature (Advanced)", "learn": "Python Programming", "avatar": "📚", "rating": 4.8},
+        {"name": "Mehdi Larbi", "age": 24, "gender": "Man", "teach": "Data Structures & Algorithms", "learn": "Digital Marketing", "avatar": "👨‍💻", "rating": 4.7},
+        {"name": "Sarah Chen", "age": 23, "gender": "Woman", "teach": "UI/UX Design & Figma", "learn": "French Fluency", "avatar": "🎨", "rating": 5.0},
+        {"name": "Yacine Brahimi", "age": 25, "gender": "Man", "teach": "Macroeconomics & Finance", "learn": "Korean Language", "avatar": "📊", "rating": 4.6}
     ]
 
     # Chat Conversations
     st.session_state.chats = {
-        "malak dechicha": [
-            {"sender": "malak dechicha", "text": "Hi Feriel! Are we still on for our Spanish & Python exchange at 4 PM?", "time": "3:15 PM"},
+        "Anfal Fittih": [
+            {"sender": "Anfal Fittih", "text": "Hi Feriel! Are we still on for our Spanish & Python exchange at 4 PM?", "time": "3:15 PM"},
             {"sender": "Feriel", "text": "Yes absolutely! I have my Jupyter notebook ready for the Python algorithms part.", "time": "3:20 PM"}
         ],
         "Sarah Chen": [
-            {"sender": "Sarah lily", "text": "Check out the wireframes I uploaded to the shared canvas.", "time": "Yesterday"},
+            {"sender": "Sarah Chen", "text": "Check out the wireframes I uploaded to the shared canvas.", "time": "Yesterday"},
             {"sender": "Feriel", "text": "Looks super clean and minimalist! Love the color scheme.", "time": "Yesterday"}
         ]
     }
