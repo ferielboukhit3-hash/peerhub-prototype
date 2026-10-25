@@ -1,9 +1,7 @@
 import streamlit as st
-import datetime
+from datetime import datetime, date, time
 
-# -----------------------------------------------------------------------------
-# PAGE CONFIGURATION & THEMING
-# -----------------------------------------------------------------------------
+# --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="PeerHub — Interactive Skill Exchange",
     page_icon="🤝",
@@ -11,454 +9,500 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom minimalist styling (Platinum background #F3F3F4, Space Indigo #1B1F3B, Clean Blue #0A66C2)
+# --- GLOBAL STYLING & COLOR PALETTE ---
+# Platinum: #F3F3F4, Space Indigo: #1B1F3B, Clean Blue: #0A66C2
 st.markdown("""
     <style>
+        /* Main Theme Background */
         .stApp {
             background-color: #F3F3F4;
             color: #1B1F3B;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+        
+        /* Sidebar Styling */
+        section[data-testid="stSidebar"] {
+            background-color: #FFFFFF;
+            border-right: 1px solid #E2E8F0;
+        }
+        
+        /* Headers & Typography */
         h1, h2, h3, h4, h5, h6 {
             color: #1B1F3B !important;
-            font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+        
+        /* Custom Cards */
+        .peer-card {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            margin-bottom: 16px;
+            transition: transform 0.2s ease;
+        }
+        .peer-card:hover {
+            border-color: #0A66C2;
+            box-shadow: 0 4px 12px rgba(10, 102, 194, 0.08);
+        }
+        
+        /* Primary Buttons */
         .stButton>button {
             background-color: #0A66C2;
-            color: white;
-            border-radius: 6px;
+            color: #FFFFFF;
+            border-radius: 8px;
             border: none;
-            padding: 0.5rem 1rem;
             font-weight: 600;
-            transition: background-color 0.2s ease;
+            padding: 0.5rem 1rem;
         }
         .stButton>button:hover {
             background-color: #084e96;
-            color: white;
+            color: #FFFFFF;
         }
-        .card {
-            background-color: #FFFFFF;
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #E1E1E6;
-            box-shadow: 0 2px 4px rgba(27, 31, 59, 0.04);
-            margin-bottom: 1rem;
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background-color: #E6F0FA;
-            color: #0A66C2;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .sidebar .stRadio label {
-            color: #1B1F3B;
-            font-weight: 500;
-        }
+        
+        /* Status Badges */
+        .badge-online { background-color: #DEF7EC; color: #03543F; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-session { background-color: #FEF08A; color: #713F12; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-away { background-color: #F3F4F6; color: #4B5563; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
     </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# SESSION STATE INITIALIZATION
-# -----------------------------------------------------------------------------
-if "initialized" not in st.session_state:
-    st.session_state.initialized = True
-    
-    # User Profile State
-    st.session_state.profile = {
-        "name": "Feriel",
-        "full_name": "Feriel Boukhit",
-        "title": "International Trade Student & Aspiring Full-Stack Developer",
-        "location": "Algiers, Algeria",
-        "about": "Third-year university student studying Commercial Sciences & International Trade at University of Algiers 3. Passionate about Python, languages, digital marketing, and international economic diplomacy.",
-        "teach_skill": "Python Programming",
-        "teach_level": "Intermediate",
-        "learn_skill": "Spanish",
-        "learn_level": "Beginner",
-        "linkedin": "linkedin.com/in/feriel-boukhit",
-        "github": "github.com/ferielboukhit3-hash",
-        "gender": "Woman",
-        "age": 21,
-        "completed_sessions": 4,
-        "hours_earned": 5,
-        "rating": 4.9,
-        "dark_mode": False
-    }
-
-    # Community Posts Feed
-    st.session_state.posts = [
-        {
-            "id": 1,
-            "author": "Feriel Boukhit",
-            "time": "2 hours ago",
-            "content": "Just finished building my first collaborative Python script for tracking international trade tariffs! Excited to exchange ideas with fellow peers on PeerHub 🚀",
-            "likes": 12,
-            "comments": 3,
-            "liked_by_user": False
-        },
-        {
-            "id": 2,
-            "author": "Anfal Fittih",
-            "time": "Yesterday",
-            "content": "Working on advanced Spanish verb conjugations today. If anyone wants to practice conversational tandem sessions this evening, let me know!",
-            "likes": 8,
-            "comments": 1,
-            "liked_by_user": True
-        },
-        {
-            "id": 3,
-            "author": "Karim Benzema",
-            "time": "3 days ago",
-            "content": "Shared a new template for digital marketing analytics and ROI tracking in the Document Vault. Check it out if you're exploring e-commerce metrics!",
-            "likes": 19,
-            "comments": 5,
-            "liked_by_user": False
+# --- SAFE SESSION STATE INITIALIZATION ---
+def initialize_session_state():
+    if 'profile' not in st.session_state:
+        st.session_state.profile = {
+            'full_name': 'Feriel Boukhit',
+            'title': 'Full-Stack Developer & UI/UX Designer',
+            'location': 'Algiers, Algeria',
+            'bio': 'Passionate about building seamless digital experiences, modern web applications, and exploring collaborative peer-to-peer learning networks.',
+            'skills': {'Python': 'Advanced', 'React / Next.js': 'Intermediate', 'UI/UX Design': 'Expert', 'Machine Learning': 'Intermediate'},
+            'credits': 5,
+            'completed_sessions': 14,
+            'rating': 4.9,
+            'badges': ['Reliable Partner ⭐', 'Streak Master 🔥', 'Python Pro 🐍', 'Design Guru 🎨'],
+            'avatar': None
         }
-    ]
+    
+    if 'selected_page' not in st.session_state:
+        st.session_state.selected_page = "🏠 Home & Posts"
 
-    # Community Directory Users (Mock + Supabase Ready)
-    st.session_state.directory_users = [
-        {"name": "Feriel Boukhit", "age": 21, "gender": "Woman", "teach": "Python Programming (Intermediate)", "learn": "Spanish (Beginner)", "avatar": "👩‍💻", "rating": 4.9},
-        {"name": "Anfal Fittih", "age": 22, "gender": "Woman", "teach": "Spanish & Literature (Advanced)", "learn": "Python Programming", "avatar": "📚", "rating": 4.8},
-        {"name": "Mehdi Larbi", "age": 24, "gender": "Man", "teach": "Data Structures & Algorithms", "learn": "Digital Marketing", "avatar": "👨‍💻", "rating": 4.7},
-        {"name": "Sarah Chen", "age": 23, "gender": "Woman", "teach": "UI/UX Design & Figma", "learn": "French Fluency", "avatar": "🎨", "rating": 5.0},
-        {"name": "Yacine Brahimi", "age": 25, "gender": "Man", "teach": "Macroeconomics & Finance", "learn": "Korean Language", "avatar": "📊", "rating": 4.6}
-    ]
-
-    # Chat Conversations
-    st.session_state.chats = {
-        "Anfal Fittih": [
-            {"sender": "Anfal Fittih", "text": "Hi Feriel! Are we still on for our Spanish & Python exchange at 4 PM?", "time": "3:15 PM"},
-            {"sender": "Feriel", "text": "Yes absolutely! I have my Jupyter notebook ready for the Python algorithms part.", "time": "3:20 PM"}
-        ],
-        "Sarah Chen": [
-            {"sender": "Sarah Chen", "text": "Check out the wireframes I uploaded to the shared canvas.", "time": "Yesterday"},
-            {"sender": "Feriel", "text": "Looks super clean and minimalist! Love the color scheme.", "time": "Yesterday"}
+    if 'posts' not in st.session_state:
+        st.session_state.posts = [
+            {
+                'author': 'Alex Rivera',
+                'role': 'Data Science Enthusiast',
+                'time': '2 hours ago',
+                'content': 'Just completed a 3-hour session on advanced Pandas data manipulation with Feriel! The credit exchange system is fantastic. 🚀',
+                'likes': 12,
+                'comments': ['Awesome work!', 'Would love to join the next session!']
+            },
+            {
+                'author': 'Sarah Jenkins',
+                'role': 'Product Designer',
+                'time': '5 hours ago',
+                'content': 'Looking for someone to practice conversational Spanish with in exchange for Figma & Design System mentorship. Drop a message!',
+                'likes': 8,
+                'comments': ['Sent you a DM!']
+            }
         ]
-    }
 
-# -----------------------------------------------------------------------------
-# SIDEBAR NAVIGATION
-# -----------------------------------------------------------------------------
-st.sidebar.markdown("## 🤝 PeerHub")
-st.sidebar.markdown("---")
+    if 'peers' not in st.session_state:
+        st.session_state.peers = [
+            {'id': 'alex', 'name': 'Alex Rivera', 'title': 'Data Scientist', 'status': 'Online', 'skills': ['Python', 'SQL', 'Machine Learning'], 'rating': 4.8},
+            {'id': 'sarah', 'name': 'Sarah Jenkins', 'title': 'UI/UX Designer', 'status': 'In a session', 'skills': ['Figma', 'Design Systems', 'User Research'], 'rating': 5.0},
+            {'id': 'liam', 'name': 'Liam Chen', 'title': 'Full Stack Developer', 'status': 'Away', 'skills': ['JavaScript', 'Node.js', 'React'], 'rating': 4.7},
+            {'id': 'elena', 'name': 'Elena Rostova', 'title': 'Mobile Developer', 'status': 'Online', 'skills': ['Flutter', 'Swift', 'Kotlin'], 'rating': 4.9}
+        ]
 
-page = st.sidebar.radio(
-    "🧭 Platform Navigation",
-    [
-        "🏠 Home & Posts (Community Feed)",
-        "👥 Community Directory",
-        "💬 Chats & Direct Hub",
+    if 'viewing_profile' not in st.session_state:
+        st.session_state.viewing_profile = None
+
+    if 'chats' not in st.session_state:
+        st.session_state.chats = {
+            'Alex Rivera': [
+                {'sender': 'Alex', 'text': 'Hey Feriel! Ready for our Python review session today?', 'time': '10:15 AM'},
+                {'sender': 'Feriel', 'text': 'Hi Alex! Yes absolutely, let me pull up the shared resources notebook.', 'time': '10:18 AM'}
+            ],
+            'Sarah Jenkins': [
+                {'sender': 'Sarah', 'text': 'Loved your design feedback on the new wireframes.', 'time': 'Yesterday'}
+            ]
+        }
+
+    if 'scheduled_sessions' not in st.session_state:
+        st.session_state.scheduled_sessions = [
+            {'peer': 'Alex Rivera', 'topic': 'Python & Data Structures', 'date': str(date.today()), 'time': '14:00', 'status': 'Confirmed'}
+        ]
+
+initialize_session_state()
+
+# --- SIDEBAR NAVIGATION ---
+with st.sidebar:
+    st.markdown("## 🤝 PeerHub")
+    st.markdown("### 🧭 Platform Navigation")
+    
+    nav_options = [
+        "🏠 Home & Posts", 
+        "👥 Peers Directory", 
+        "💬 Chats & Direct Hub", 
+        "📅 Course Schedule", 
         "👤 My Profile"
     ]
-)
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("### Quick Session Status")
-st.sidebar.info(f"**Active User:** {st.session_state.profile['name']}\n\n**Credits:** {st.session_state.profile['hours_earned']} hrs earned")
-
-# -----------------------------------------------------------------------------
-# 1. HOME & POSTS PAGE (COMMUNITY FEED)
-# -----------------------------------------------------------------------------
-if page == "🏠 Home & Posts (Community Feed)":
-    st.markdown("# 🏠 Community Feed & Learning Wall")
-    st.markdown("Share your learning progress, discover insights from peers, and collaborate in real-time.")
     
-    # Create New Post Box
-    with st.form("new_post_form", clear_on_submit=True):
-        st.markdown("### ✍️ Share an update or question")
-        new_post_content = st.text_area("What are you working on today?", placeholder="Write your thoughts, ask a question, or share a milestone...", height=100)
-        col1, col2 = st.columns([6, 1])
-        with col2:
-            submitted = st.form_submit_button("Post Update")
+    # Determine default index
+    current_selection = st.session_state.get('selected_page', "🏠 Home & Posts")
+    if current_selection not in nav_options:
+        current_selection = "🏠 Home & Posts"
         
-        if submitted and new_post_content.strip():
-            new_entry = {
-                "id": len(st.session_state.posts) + 1,
-                "author": st.session_state.profile['full_name'],
-                "time": "Just now",
-                "content": new_post_content.strip(),
-                "likes": 0,
-                "comments": 0,
-                "liked_by_user": False
+    selected_nav = st.radio("Go to", nav_options, index=nav_options.index(current_selection), label_visibility="collapsed")
+    st.session_state.selected_page = selected_nav
+
+    st.markdown("---")
+    st.markdown("### ⚡ Quick Session Status")
+    st.info(f"**Active User:** {st.session_state.profile['full_name']}\n\n**Hour Bank:** {st.session_state.profile['credits']} hrs earned")
+
+# ==========================================
+# 1. HOME & POSTS PAGE (COMMUNITY FEED)
+# ==========================================
+if st.session_state.selected_page == "🏠 Home & Posts":
+    st.title("🏠 Community Feed & Posts")
+    st.markdown("Share your learning milestones, brainstorm ideas, or ask the community for assistance.")
+    
+    # Create new post box
+    with st.form("new_post_form", clear_on_submit=True):
+        st.markdown("### ✨ Create New Post")
+        post_content = st.text_area("What's on your mind?", placeholder="Share your learning progress, thoughts, or skill exchange requests...")
+        submit_post = st.form_submit_button("Publish Post")
+        
+        if submit_post and post_content.strip():
+            new_item = {
+                'author': st.session_state.profile['full_name'],
+                'role': st.session_state.profile['title'],
+                'time': 'Just now',
+                'content': post_content,
+                'likes': 0,
+                'comments': []
             }
-            st.session_state.posts.insert(0, new_entry)
+            st.session_state.posts.insert(0, new_item)
             st.success("Post published successfully!")
             st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📰 Recent Community Activity")
-
-    # Display Feed Posts
+    st.markdown("### 📰 Community Wall")
+    
     for idx, post in enumerate(st.session_state.posts):
         with st.container():
             st.markdown(f"""
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <strong>👤 {post['author']}</strong>
-                        <span style="color: #6E7191; font-size: 0.85rem;">{post['time']}</span>
+                <div class="peer-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <strong style="font-size: 16px; color: #1B1F3B;">{post['author']}</strong> 
+                            <span style="color: #64748B; font-size: 13px;">— {post['role']}</span>
+                        </div>
+                        <span style="color: #94A3B8; font-size: 12px;">{post['time']}</span>
                     </div>
-                    <p style="font-size: 1.05rem; color: #1B1F3B; margin-bottom: 1rem;">{post['content']}</p>
+                    <p style="color: #334155; font-size: 15px; margin-bottom: 16px;">{post['content']}</p>
                 </div>
             """, unsafe_allow_html=True)
             
-            c1, c2, c3 = st.columns([1, 1, 4])
-            with c1:
-                like_label = f"❤️ {post['likes']}" if not post['liked_by_user'] else f"💖 {post['likes']}"
-                if st.button(like_label, key=f"like_{post['id']}"):
-                    if post['liked_by_user']:
-                        post['likes'] -= 1
-                        post['liked_by_user'] = False
-                    else:
-                        post['likes'] += 1
-                        post['liked_by_user'] = True
+            col_like, col_comment_count = st.columns([1, 5])
+            with col_like:
+                if st.button(f"❤️ {post['likes']}", key=f"like_{idx}"):
+                    st.session_state.posts[idx]['likes'] += 1
                     st.rerun()
-            with c2:
-                if st.button(f"💬 {post['comments']} Comments", key=f"comment_{post['id']}"):
-                    st.toast(f"Opening discussion thread for post #{post['id']}")
+            
+            # Comments section
+            with st.expander(f"💬 Comments ({len(post['comments'])})"):
+                for comment in post['comments']:
+                    st.markdown(f"- {comment}")
+                
+                new_comment = st.text_input("Add a comment...", key=f"comment_input_{idx}")
+                if st.button("Reply", key=f"reply_btn_{idx}"):
+                    if new_comment.strip():
+                        st.session_state.posts[idx]['comments'].append(f"**{st.session_state.profile['full_name']}**: {new_comment}")
+                        st.rerun()
 
-# -----------------------------------------------------------------------------
-# 2. COMMUNITY DIRECTORY PAGE
-# -----------------------------------------------------------------------------
-elif page == "👥 Community Directory":
-    st.markdown("# 👥 Community Directory")
-    st.markdown("Explore active learners and instructors across the PeerHub network.")
-
-    # Search and Filters
-    col_search, col_gender, col_skill = st.columns([2, 1, 1])
-    with col_search:
-        search_query = st.text_input("🔍 Search users by name or skill", placeholder="Type a name or topic...")
-    with col_gender:
-        gender_filter = st.selectbox("Filter by Gender", ["All", "Woman", "Man"])
-    with col_skill:
-        skill_filter = st.selectbox("Filter by Skill Domain", ["All", "Python Programming", "Spanish", "Digital Marketing", "UI/UX Design", "Macroeconomics"])
-
-    st.markdown("---")
-
-    # Filter Logic
-    filtered_users = st.session_state.directory_users
-    if search_query:
-        filtered_users = [u for u in filtered_users if search_query.lower() in u['name'].lower() or search_query.lower() in u['teach'].lower() or search_query.lower() in u['learn'].lower()]
-    if gender_filter != "All":
-        filtered_users = [u for u in filtered_users if u['gender'] == gender_filter]
-    if skill_filter != "All":
-        filtered_users = [u for u in filtered_users if skill_filter.lower() in u['teach'].lower() or skill_filter.lower() in u['learn'].lower()]
-
-    # Render User Cards in Grid
-    if not filtered_users:
-        st.warning("No matching users found. Try broadening your search criteria.")
+# ==========================================
+# 2. PEERS PAGE (COMMUNITY DIRECTORY)
+# ==========================================
+elif st.session_state.selected_page == "👥 Peers Directory":
+    # Check if we are viewing a specific peer profile dynamically
+    if st.session_state.get('viewing_profile'):
+        peer = st.session_state.viewing_profile
+        if st.button("← Back to Directory"):
+            st.session_state.viewing_profile = None
+            st.rerun()
+            
+        st.title(f"👤 {peer['name']}'s Profile")
+        st.markdown(f"### {peer['title']}")
+        
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            st.markdown(f"""
+                <div class="peer-card">
+                    <h4>Status: <span class="badge-online">{peer['status']}</span></h4>
+                    <p>⭐ <b>Rating:</b> {peer['rating']} / 5.0</p>
+                    <hr>
+                    <b>Skills Offered:</b>
+                    <ul>
+                        {''.join([f"<li>{s}</li>" for s in peer['skills']])}
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown("### About & Exchange Sessions")
+            st.write(f"{peer['name']} is an active member of PeerHub specializing in collaborative skill exchange. Book a session or initiate a direct chat to start learning together!")
+            if st.button("💬 Start Direct Chat", key=f"chat_with_{peer['id']}"):
+                st.session_state.selected_page = "💬 Chats & Direct Hub"
+                st.rerun()
     else:
+        st.title("👥 Community Directory")
+        st.markdown("Discover active peers, filter by skills, and collaborate on exchange sessions.")
+        
+        search_query = st.text_input("🔍 Search peers by name or skill...", "").lower()
+        
+        filtered_peers = [
+            p for p in st.session_state.peers 
+            if search_query in p['name'].lower() or any(search_query in s.lower() for s in p['skills']) or search_query in p['title'].lower()
+        ]
+        
         cols = st.columns(2)
-        for i, user in enumerate(filtered_users):
+        for i, peer in enumerate(filtered_peers):
             with cols[i % 2]:
+                status_class = "badge-online" if peer['status'] == "Online" else ("badge-session" if peer['status'] == "In a session" else "badge-away")
                 st.markdown(f"""
-                    <div class="card">
-                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                            <div style="font-size: 2.5rem; background: #E6F0FA; padding: 0.5rem; border-radius: 50%; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
-                                {user['avatar']}
-                            </div>
-                            <div>
-                                <h3 style="margin: 0; font-size: 1.2rem;">{user['name']}</h3>
-                                <p style="margin: 0; color: #6E7191; font-size: 0.9rem;">{user['gender']} · {user['age']} yrs old · ⭐ {user['rating']}</p>
-                            </div>
+                    <div class="peer-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0; color: #1B1F3B;">{peer['name']}</h3>
+                            <span class="{status_class}">{peer['status']}</span>
                         </div>
-                        <p style="margin: 0.2rem 0;"><strong>🎓 Can Teach:</strong> {user['teach']}</p>
-                        <p style="margin: 0.2rem 0 1rem 0;"><strong>📚 Wants to Learn:</strong> {user['learn']}</p>
+                        <p style="color: #64748B; margin: 4px 0 12px 0;">{peer['title']} • ⭐ {peer['rating']}</p>
+                        <div style="margin-bottom: 12px;">
+                            {' '.join([f'<span style="background: #E0F2FE; color: #0369A1; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; margin-right: 4px;">{s}</span>' for s in peer['skills']])}
+                        </div>
                     </div>
                 """, unsafe_allow_html=True)
+                if st.button(f"View Profile & Connect", key=f"view_peer_{peer['id']}"):
+                    st.session_state.viewing_profile = peer
+                    st.rerun()
 
-# -----------------------------------------------------------------------------
-# 3. CHATS & DIRECT MESSAGING HUB (AI-CHAT STYLE)
-# -----------------------------------------------------------------------------
-elif page == "💬 Chats & Direct Hub":
-    st.markdown("# 💬 Partner Chat & Direct Messaging Hub")
-    st.markdown("Modern AI-assisted chat interface for seamless skill exchange and resource sharing.")
-
-    # Dual-pane layout: Chat on left, Shared Resources on right
-    chat_col, res_col = st.columns([3, 2])
-
+# ==========================================
+# 3. CHATS (INSTAGRAM/SNAPCHAT STYLE)
+# ==========================================
+elif st.session_state.selected_page == "💬 Chats & Direct Hub":
+    st.title("💬 Chats & Direct Hub")
+    
+    chat_names = list(st.session_state.chats.keys())
+    selected_chat = st.selectbox("Select Conversation Thread", chat_names)
+    
+    # Dual-pane layout: Chat on left, Shared resources on right
+    chat_col, resource_col = st.columns([2, 1])
+    
     with chat_col:
-        st.markdown("### Active Conversation")
-        selected_partner = st.selectbox("Select Learning Partner", list(st.session_state.chats.keys()))
+        st.markdown(f"### 💬 Conversation with {selected_chat}")
         
-        # Chat container box
-        chat_box = st.container()
-        with chat_box:
-            st.markdown('<div class="card" style="height: 380px; overflow-y: auto;">', unsafe_allow_html=True)
-            for msg in st.session_state.chats[selected_partner]:
-                alignment = "text-align: right;" if msg["sender"] == "Feriel" else "text-align: left;"
-                bg_color = "#E6F0FA" if msg["sender"] == "Feriel" else "#FFFFFF"
-                border_col = "#0A66C2" if msg["sender"] == "Feriel" else "#E1E1E6"
+        # Chat box container
+        chat_container = st.container(height=400)
+        with chat_container:
+            for msg in st.session_state.chats[selected_chat]:
+                alignment = "right" if msg['sender'] == 'Feriel' else "left"
+                bg_color = "#0A66C2" if msg['sender'] == 'Feriel' else "#FFFFFF"
+                text_color = "#FFFFFF" if msg['sender'] == 'Feriel' else "#1B1F3B"
+                border_style = "1px solid #E2E8F0" if msg['sender'] != 'Feriel' else "none"
+                
                 st.markdown(f"""
-                    <div style="{alignment} margin-bottom: 0.8rem;">
-                        <span style="font-size: 0.75rem; color: #6E7191;">{msg['sender']} · {msg['time']}</span>
-                        <div style="background-color: {bg_color}; border: 1px solid {border_col}; padding: 0.6rem 1rem; border-radius: 8px; display: inline-block; max-width: 80%; text-align: left;">
+                    <div style="text-align: {alignment}; margin-bottom: 10px;">
+                        <div style="display: inline-block; background-color: {bg_color}; color: {text_color}; padding: 10px 14px; border-radius: 12px; border: {border_style}; max-width: 75%; text-align: left;">
+                            <small style="opacity: 0.8; display: block; font-size: 10px; margin-bottom: 2px;">{msg['sender']} • {msg['time']}</small>
                             {msg['text']}
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Interactive Message Input & Media Options
+        user_message = st.text_input("Type a message...", key="chat_msg_input")
+        
+        col_send, col_video, col_audio, col_voice, col_media = st.columns([2, 1, 1, 1, 1])
+        with col_send:
+            if st.button("Send Message", use_container_width=True):
+                if user_message.strip():
+                    st.session_state.chats[selected_chat].append({
+                        'sender': 'Feriel',
+                        'text': user_message,
+                        'time': datetime.now().strftime("%I:%M %p")
+                    })
+                    st.rerun()
+        with col_video:
+            if st.button("📹 Video", use_container_width=True):
+                st.toast("Initiating simulated Video Call...")
+        with col_audio:
+            if st.button("📞 Audio", use_container_width=True):
+                st.toast("Initiating simulated Audio Call...")
+        with col_voice:
+            if st.button("🎤 Voice", use_container_width=True):
+                st.toast("Voice note recorded and attached!")
+        with col_media:
+            if st.button("📷 Media", use_container_width=True):
+                st.toast("Media attachment dialog opened.")
 
-        # Interactive Chat Input Area with Media/File Uploader, Gallery & Voice Choice
-        with st.form("chat_input_form", clear_on_submit=True):
-            user_message = st.text_input("Message your partner...", placeholder="Type message or prompt AI assistant...")
-            
-            c_input1, c_input2, c_input3, c_input4 = st.columns([1, 1, 1, 2])
-            with c_input1:
-                attach_doc = st.form_submit_button("📎 Document Vault")
-            with c_input2:
-                attach_img = st.form_submit_button("🖼️ Visual Gallery")
-            with c_input3:
-                voice_msg = st.form_submit_button("🎤 Voice Note")
-            with c_input4:
-                send_msg = st.form_submit_button("Send Message 🚀", use_container_width=True)
-
-            if send_msg and user_message.strip():
-                st.session_state.chats[selected_partner].append({
-                    "sender": "Feriel",
-                    "text": user_message.strip(),
-                    "time": datetime.datetime.now().strftime("%I:%M %p")
-                })
-                st.rerun()
-            elif attach_doc:
-                st.toast("Document Vault attached to chat session.")
-            elif attach_img:
-                st.toast("Visual Gallery attached to chat session.")
-            elif voice_msg:
-                st.toast("Simulated Voice Message recorded and sent.")
-
-    with res_col:
-        st.markdown("### 🗂️ Shared Resources & Sketches")
+    with resource_col:
+        st.markdown("### 🗂️ Shared Resources")
         st.markdown("""
-            <div class="card">
-                <h4>📌 Pinned Canvas Items</h4>
-                <p style="font-size: 0.9rem; color: #6E7191;">Collaborative artifacts shared during sessions with <strong>%s</strong>:</p>
-                <ul>
-                    <li><strong>Python_Trade_Tariff_Parser.py</strong> (Script)</li>
-                    <li><strong>Spanish_Verbs_CheatSheet.pdf</strong> (Document)</li>
-                    <li><strong>UI_Wireframe_Sketch_v2.png</strong> (Design)</li>
-                </ul>
-                <hr style="border: 0; border-top: 1px solid #E1E1E6; margin: 1rem 0;">
-                <h4>🤖 AI Session Summary</h4>
-                <p style="font-size: 0.9rem;">Both participants successfully reviewed data parsing structures and practiced 15 minutes of conversational Spanish.</p>
+            <div class="peer-card">
+                <b>📌 Pinned Notebooks</b>
+                <p style="font-size: 13px; color: #64748B; margin-top: 5px;">Python_Basics_Notes.ipynb</p>
+                <hr style="margin: 8px 0;">
+                <b>🎨 Shared Design Board</b>
+                <p style="font-size: 13px; color: #64748B; margin-top: 5px;">Figma Wireframe Sprint v2</p>
             </div>
-        """ % selected_partner, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+        
+        uploaded_sketch = st.file_uploader("Upload sketch or document", type=['png', 'jpg', 'pdf'])
+        if uploaded_sketch:
+            st.success("Resource uploaded to chat successfully!")
 
-# -----------------------------------------------------------------------------
-# 4. MY PROFILE PAGE (STANDARD & STRUCTURED)
-# -----------------------------------------------------------------------------
-elif page == "👤 My Profile":
-    # Top Header Status / Utility Bar
-    top_col1, top_col2, top_col3 = st.columns([3, 1, 1])
-    with top_col1:
-        st.markdown("# 👤 My Professional Portfolio")
-    with top_col2:
+# ==========================================
+# 4. COURSE SCHEDULE & CALENDAR PAGE
+# ==========================================
+elif st.session_state.selected_page == "📅 Course Schedule":
+    st.title("📅 Course Schedule & Calendar Manager")
+    st.markdown("Organize and manage upcoming peer exchange sessions with your learning partners.")
+    
+    col_sched1, col_sched2 = st.columns([1, 1])
+    
+    with col_sched1:
+        st.markdown("### 🗓️ Book New Session")
+        with st.form("booking_form"):
+            partner_name = st.selectbox("Select Peer Partner", [p['name'] for p in st.session_state.peers])
+            session_topic = st.text_input("Course / Exchange Topic", "Advanced UI Prototyping")
+            session_date = st.date_input("Session Date", date.today())
+            session_time = st.time_input("Session Time", time(15, 0))
+            
+            book_btn = st.form_submit_button("Confirm & Schedule Session")
+            if book_btn:
+                st.session_state.scheduled_sessions.append({
+                    'peer': partner_name,
+                    'topic': session_topic,
+                    'date': str(session_date),
+                    'time': str(session_time),
+                    'status': 'Confirmed'
+                })
+                st.success(f"Session successfully booked with {partner_name}!")
+                st.rerun()
+
+    with col_sched2:
+        st.markdown("### 📋 Your Confirmed Sessions")
+        if not st.session_state.scheduled_sessions:
+            st.info("No upcoming sessions scheduled.")
+        else:
+            for s in st.session_state.scheduled_sessions:
+                st.markdown(f"""
+                    <div class="peer-card">
+                        <h4 style="margin: 0; color: #0A66C2;">{s['topic']}</h4>
+                        <p style="margin: 4px 0; font-weight: 500;">Partner: {s['peer']}</p>
+                        <p style="color: #64748B; font-size: 13px; margin: 0;">📅 {s['date']} at {s['time']} • <span style="color: #059669; font-weight: 600;">{s['status']}</span></p>
+                    </div>
+                """, unsafe_allow_html=True)
+
+# ==========================================
+# 5. MY PROFILE PAGE (STANDARD & STRUCTURED)
+# ==========================================
+elif st.session_state.selected_page == "👤 My Profile":
+    # Top header status & utility bar
+    col_top1, col_top2 = st.columns([3, 1])
+    with col_top1:
+        st.title("👤 My Professional Portfolio")
+    with col_top2:
+        dark_mode_toggle = st.toggle("Dark/Light Mode", value=False)
         st.markdown("🕒 **Schedule:** Active")
-    with top_col3:
-        dark_mode_toggle = st.toggle("Dark/Light Mode", value=st.session_state.profile['dark_mode'])
-        if dark_mode_toggle != st.session_state.profile['dark_mode']:
-            st.session_state.profile['dark_mode'] = dark_mode_toggle
-            st.toast("Theme preference updated!")
 
-    # Custom Cover Banner & Profile Avatar Header
+    # Cover banner & Profile avatar section
     st.markdown("""
         <div style="background: linear-gradient(135deg, #0A66C2 0%, #1B1F3B 100%); height: 140px; border-radius: 12px; margin-bottom: -50px;"></div>
-        <div style="display: flex; align-items: flex-end; gap: 1.5rem; padding: 0 2rem; margin-bottom: 1.5rem;">
-            <div style="font-size: 4rem; background: #FFFFFF; border: 4px solid #FFFFFF; border-radius: 50%; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                👩‍💻
-            </div>
-            <div style="padding-top: 1.5rem;">
-                <h2 style="margin: 0; color: #1B1F3B;">%s</h2>
-                <p style="margin: 0; color: #6E7191; font-weight: 500;">%s · 📍 %s</p>
-            </div>
-        </div>
-    """ % (st.session_state.profile['full_name'], st.session_state.profile['title'], st.session_state.profile['location']), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+    
+    col_avatar, col_info = st.columns([1, 4])
+    with col_avatar:
+        if st.session_state.profile['avatar']:
+            st.image(st.session_state.profile['avatar'], width=110)
+        else:
+            st.markdown("""
+                <div style="width: 110px; height: 110px; background-color: #CBD5E1; border-radius: 50%; border: 4px solid white; display: flex; align-items: center; justify-content: center; font-size: 40px;">
+                    👩‍💻
+                </div>
+            """, unsafe_allow_html=True)
+            
+        # Camera & Image upload options
+        with st.expander("📷 Update Avatar"):
+            uploaded_file = st.file_uploader("Upload Profile Picture", type=['png', 'jpg', 'jpeg'])
+            if uploaded_file:
+                st.session_state.profile['avatar'] = uploaded_file
+                st.success("Avatar updated!")
+                st.rerun()
+            
+            camera_image = st.camera_input("Take a picture")
+            if camera_image:
+                st.session_state.profile['avatar'] = camera_image
+                st.success("Camera photo set as avatar!")
+                st.rerun()
+
+    with col_info:
+        st.markdown(f"### {st.session_state.profile['full_name']}")
+        st.markdown(f"**{st.session_state.profile['title']}** • 📍 {st.session_state.profile['location']}")
+
+    st.markdown("---")
 
     # Analytics Metrics Row
     m1, m2, m3 = st.columns(3)
-    with m1:
-        st.markdown(f"""
-            <div class="card" style="text-align: center;">
-                <h4 style="margin:0; color: #6E7191;">Completed Sessions</h4>
-                <h2 style="margin:0; color: #0A66C2; font-size: 2rem;">{st.session_state.profile['completed_sessions']}</h2>
-                <span style="font-size: 0.8rem; color: #28a745;">↑ 100% Success</span>
-            </div>
-        """, unsafe_allow_html=True)
-    with m2:
-        st.markdown(f"""
-            <div class="card" style="text-align: center;">
-                <h4 style="margin:0; color: #6E7191;">Hours Earned</h4>
-                <h2 style="margin:0; color: #0A66C2; font-size: 2rem;">{st.session_state.profile['hours_earned']} hrs</h2>
-                <span style="font-size: 0.8rem; color: #28a745;">+1 this week</span>
-            </div>
-        """, unsafe_allow_html=True)
-    with m3:
-        st.markdown(f"""
-            <div class="card" style="text-align: center;">
-                <h4 style="margin:0; color: #6E7191;">Community Rating</h4>
-                <h2 style="margin:0; color: #0A66C2; font-size: 2rem;">{st.session_state.profile['rating']} / 5.0</h2>
-                <span style="font-size: 0.8rem; color: #f39c12;">⭐ Top Rated</span>
-            </div>
-        """, unsafe_allow_html=True)
+    m1.metric("Completed Sessions", st.session_state.profile['completed_sessions'], "+2 this week")
+    m2.metric("Hour Bank (Credits)", f"{st.session_state.profile['credits']} hrs", "Earn & Redeem")
+    m3.metric("Community Rating", f"{st.session_state.profile['rating']} ⭐", "Top 5% Rated")
+
+    st.markdown("---")
 
     # Editable Bio ("About Me") Section
     st.markdown("### 📝 About Me")
-    with st.form("profile_edit_form"):
-        edited_about = st.text_area("Edit your professional summary:", value=st.session_state.profile['about'], height=100)
-        
-        st.markdown("### 💡 Skills & Expertise & Proficiency Levels")
-        col_s1, col_s2 = st.columns(2)
-        with col_s1:
-            teach_skill_input = st.text_input("Skill to Teach", value=st.session_state.profile['teach_skill'])
-            teach_level_input = st.selectbox("Primary Teaching Skill Level", ["Beginner", "Intermediate", "Advanced", "Expert"], index=1)
-        with col_s2:
-            learn_skill_input = st.text_input("Skill to Learn", value=st.session_state.profile['learn_skill'])
-            learn_level_input = st.selectbox("Primary Learning Goal Level", ["Beginner", "Intermediate", "Advanced"], index=0)
+    new_bio = st.text_area("Edit your professional bio", value=st.session_state.profile['bio'])
+    if st.button("Save Bio"):
+        st.session_state.profile['bio'] = new_bio
+        st.success("Bio updated successfully!")
 
-        st.markdown("### 🔗 Professional Links & Portfolio")
-        col_l1, col_l2 = st.columns(2)
-        with col_l1:
-            linkedin_input = st.text_input("LinkedIn Profile URL", value=st.session_state.profile['linkedin'])
-        with col_l2:
-            github_input = st.text_input("GitHub Profile URL", value=st.session_state.profile['github'])
+    st.markdown("---")
 
-        save_profile_btn = st.form_submit_button("💾 Save Profile Updates to Supabase")
+    # Skills & Expertise with Proficiency Levels
+    col_skill1, col_skill2 = st.columns(2)
+    with col_skill1:
+        st.markdown("### 🛠️ Skills & Expertise")
+        for skill, level in st.session_state.profile['skills'].items():
+            st.markdown(f"- **{skill}**: `{level}`")
+            
+        with st.form("add_skill_form"):
+            st.markdown("##### Add New Skill")
+            new_skill_name = st.text_input("Skill Name")
+            new_skill_level = st.selectbox("Proficiency Level", ["Beginner", "Intermediate", "Advanced", "Expert"])
+            add_skill_btn = st.form_submit_button("Add Skill")
+            if add_skill_btn and new_skill_name.strip():
+                st.session_state.profile['skills'][new_skill_name] = new_skill_level
+                st.success(f"Added skill: {new_skill_name}!")
+                st.rerun()
 
-        if save_profile_btn:
-            st.session_state.profile['about'] = edited_about
-            st.session_state.profile['teach_skill'] = teach_skill_input
-            st.session_state.profile['teach_level'] = teach_level_input
-            st.session_state.profile['learn_skill'] = learn_skill_input
-            st.session_state.profile['learn_level'] = learn_level_input
-            st.session_state.profile['linkedin'] = linkedin_input
-            st.session_state.profile['github'] = github_input
-            st.success("Profile successfully updated and synced with Supabase Profiles table!")
+    with col_skill2:
+        st.markdown("### 🏆 Badges Earned")
+        badge_html = " ".join([f'<span style="background: #FEF3C7; color: #92400E; padding: 6px 12px; border-radius: 8px; font-weight: 600; display: inline-block; margin: 4px;">{b}</span>' for b in st.session_state.profile['badges']])
+        st.markdown(f"<div style='margin-top: 10px;'>{badge_html}</div>", unsafe_allow_html=True)
 
-    # Badges & Streaks Showcase
-    st.markdown("### 🏆 Honors & Badges")
-    st.markdown("""
-        <div>
-            <span class="badge">Reliable Partner ⭐ (Exceptional Attendance)</span>
-            <span class="badge">Streak Master 🔥 (4 Weeks Active)</span>
-            <span class="badge">Python Pro 🐍 (Collaborative Coding)</span>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown("---")
 
     # User's Own Posts Section
     st.markdown("### 📌 My Shared Posts")
     user_posts = [p for p in st.session_state.posts if p['author'] == st.session_state.profile['full_name']]
     if not user_posts:
-        st.info("You haven't published any posts yet. Head over to the Community Feed to share your first update!")
+        st.info("You haven't published any posts yet. Head over to the Home page to share your thoughts!")
     else:
-        for p in user_posts:
+        for up in user_posts:
             st.markdown(f"""
-                <div class="card">
-                    <span style="color: #6E7191; font-size: 0.85rem;">{p['time']}</span>
-                    <p style="margin-top: 0.5rem; font-size: 1rem;">{p['content']}</p>
-                    <span style="font-size: 0.85rem; color: #0A66C2;">❤️ {p['likes']} Likes · 💬 {p['comments']} Comments</span>
+                <div class="peer-card">
+                    <small style="color: #64748B;">{up['time']}</small>
+                    <p style="margin-top: 6px; color: #1B1F3B;">{up['content']}</p>
+                    <small>❤️ {up['likes']} likes • 💬 {len(up['comments'])} comments</small>
                 </div>
             """, unsafe_allow_html=True)
