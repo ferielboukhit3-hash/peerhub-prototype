@@ -12,10 +12,10 @@ PeerHub solves the problem of passive, non-interactive online courses by establi
 * **Excuse Management System:** Structured handling of session rescheduling.
 
 ## 🛠️ Tech Stack
-* **Frontend & Backend:** Python, Streamlit
-* **Version Control:** GitHub
-* **Cloud Hosting:** Streamlit Community Cloud
+* **Frontend & Backend:** 
+* **Version Control:** 
+* **Cloud Hosting:** 
 
 ## 🔗 Links
-* **Live Demo:** [View PeerHub Live App](https://peerapp-prototype-499yga3bftex4jy2vgxccf.streamlit.app/)[cite: 1]
+* **Live Demo:** https://peerhub-platform-int-gck1.bolt.host/
 * **Code Repository:** [GitHub Repository](https://github.com/ferielboukhit3-hash/peerhub-prototype)[cite: 1]
